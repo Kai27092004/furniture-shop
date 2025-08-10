@@ -1,7 +1,7 @@
 // File: backend/server.js
 
 const express = require('express');
-const cors = require('cors');
+const cors = require('cors'); //Giấy thông hành", cho phép frontend được quyền giao tiếp với backend.
 require('dotenv').config();
 
 const app = express();
@@ -30,6 +30,7 @@ app.get('/', (req, res) => {
 // Sử dụng các routes đã định nghĩa
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/products', require('./routes/product.routes'));
+app.use('/api/users', require('./routes/user.routes'));
 // Thêm các routes khác ở đây...
 
 const PORT = process.env.PORT || 8080;

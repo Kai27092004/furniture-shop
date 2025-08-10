@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider> {/* Bọc ở đây */}
+        <CartProvider>
           <App />
         </CartProvider>
       </AuthProvider>

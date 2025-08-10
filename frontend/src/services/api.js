@@ -32,5 +32,14 @@ export const register = (userData) => API.post('/auth/register', userData);
 // --- Products ---
 export const fetchProducts = () => API.get('/products');
 export const fetchProductById = (id) => API.get(`/products/${id}`);
+// ### PHẦN CODE ĐƯỢC THÊM VÀO THEO HƯỚNG DẪN Ở BƯỚC NÀY ###
+// ##################################################################
+
+// --- User Profile ---
+// Hàm gọi API để lấy thông tin cá nhân của người dùng đang đăng nhập
+export const fetchUserProfile = () => API.get('/users/profile');
+
+// Hàm gọi API để lấy lịch sử đơn hàng của người dùng đang đăng nhập
+export const fetchMyOrders = () => API.get('/users/my-orders');
 
 export default API;

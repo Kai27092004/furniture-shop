@@ -6,6 +6,10 @@ import HomePage from './pages/HomePage';
 import ProductListPage from './pages/ProductListPage';
 import LoginPage from './pages/LoginPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminRoute from './components/AdminRoute';
 
 function App() {
   return (
@@ -18,6 +22,22 @@ function App() {
           <Route path="/products/:id" element={<ProductDetailPage />} /> {/* Route mới */}
           <Route path="/login" element={<LoginPage />} />
           {/* Thêm các routes khác ở đây */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <AdminDashboardPage />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </main>
     </div>

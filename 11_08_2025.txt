@@ -1,0 +1,22 @@
+Nhiệm vụ hôm nay:
+1.Xây dựng Trang Chi Tiết Sản Phẩm: Cho phép người dùng xem thông tin đầy đủ về một sản phẩm khi họ nhấp vào.
+2.Hoàn Thiện Chức Năng Giỏ Hàng: Làm cho nút "Thêm vào giỏ" hoạt động và cập nhật số lượng trên biểu tượng giỏ hàng.
+3.Xây Dựng Trang Giỏ Hàng: Nơi người dùng có thể xem lại, chỉnh sửa và tiến tới thanh toán.
+
+Phần 1: Xây Dựng Trang Chi Tiết Sản Phẩm (Product Detail Page)
+1.1. Tạo Component ProductCard (Tái sử dụng):			frontend/src/components/ProductCard.jsx
+								frontend/src/pages/ProductListPage.jsx (Cập nhật)
+1.2. Tạo Route và Trang Chi Tiết Sản Phẩm			
+1.Thêm Route: 							frontend/src/App.jsx
+2.Tạo Page Component: 						frontend/src/pages/ProductDetailPage.jsx
+
+Phần 2: Hoàn Thiện Chức Năng Giỏ Hàng
+2.1. Hoàn Thiện CartContext:					frontend/src/context/CartContext.jsx
+2.2. Áp Dụng CartProvider:					frontend/src/main.jsx
+2.3. Kích hoạt các nút "Thêm vào giỏ"				ProductCard.jsx
+								ProductDetailPage.jsx
+								Navbar.jsx
+Phần 3: Xây Dựng Trang Giỏ Hàng
+3.1. Tạo Route và Trang Giỏ Hàng
+1.Thêm Route: 							frontend/src/App.jsx và thêm route.
+2.Tạo Page Component: 						Tạo file CartPage.jsx trong frontend/src/pages
