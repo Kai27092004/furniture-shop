@@ -1,0 +1,1 @@
+Nhiệm vụ hôm nay: Hoàn thành database kết nối với Backend, Xây dựng giao diện Frontend đăng nhập.
