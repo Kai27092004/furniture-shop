@@ -1,0 +1,31 @@
+Nhiệm vụ hôm nay:
+1. Tạo Trang Đăng Ký 
+2. Thêm Route:
+3. Liên kết Trang Đăng Nhập và Đăng Ký: 
+4. Backend
+- Tạo các model Order và OrderItem.
+- Thiết lập các mối quan hệ (associations) giữa các model.
+- Tạo API endpoint để xử lý việc "Đặt hàng" (Checkout).
+- Cập nhật API "Lịch sử đơn hàng" để trả về dữ liệu chi tiết.
+5. FE
+- Thêm logic cho nút "Thanh toán" ở trang giỏ hàng.
+- Hiển thị lịch sử đơn hàng chi tiết trên trang cá nhân của người dùng.
+
+Bước 1: Tạo Trang Đăng Ký: 			frontend/src/pages/RegisterPage.jsx
+Bước 2: Thêm Route cho Trang Đăng Ký:		frontend/src/App.jsx
+Bước 3: Liên kết Đăng Nhập với Trang Đăng Ký:	frontend/src/pages/LoginPage.jsx
+Phần 4: Cập Nhật Backend
+1.1. Tạo Model Order và OrderItem:		backend/models/order.model.js
+						backend/models/orderItem.model.js
+1.2. Cập Nhật Mối Quan Hệ			backend/models/index.js
+1.3. Tạo Controller và Route cho Order		backend/src/controllers/order.controller.js
+						Tạo file order.routes.js trong backend/src/routes
+1.4. Cập nhật user.controller.js và server.js	server.js
+						backend/controllers/user.controller.js
+Phần 5: Cập Nhật Frontend			
+2.1. Cập Nhật API 				frontend/src/services/api.js
+2.2 thêm hàm clearCart				frontend/src/context/CartContext.jsx
+2.3. Thêm Logic Checkout			frontend/src/pages/CartPage.jsx
+2.3. Cập nhật					frontend/src/pages/ProfilePage.jsx
+
+

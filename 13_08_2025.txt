@@ -1,0 +1,27 @@
+Nhiệm vụ hôm nay:
+Xây dựng trang Admin: Quản lý Sản phẩm.
+Mục tiêu của chúng ta là tạo ra một giao diện nơi Admin có thể thực hiện đầy đủ các thao tác CRUD:
+
+Phần 1: Nâng Cấp Backend - Hoàn Thiện API Sản Phẩm
+BackEnd
+1.1. Cập nhật: 					backend/src/controllers/product.controller.js
+1.2. Cập nhật:					backend/src/routes/product.routes.js
+
+Phần 2: Xây Dựng Giao Diện Admin
+FrontEnd
+2.1. Cập nhật API Service:			frontend/src/services/api.js
+2.2. Xây Dựng Layout Chung cho Trang Admin:	frontend/src/pages/admin/AdminLayout.jsx
+2.3. Cấu hình Nested Routing (Route lồng nhau):	frontend/src/App.jsx
+2.4. Xây Dựng Trang Quản Lý Sản Phẩm:		frontend/src/pages/admin/ProductManagementPage.jsx
+
+Phần 3: Tạo Các Component Tái Sử Dụng
+1.1. Component Modal.jsx:			frontend/src/components/common/Modal.jsx
+1.2. Component ProductForm.jsx:			frontend/src/components/admin/ProductForm.jsx
+
+Phần 4: Tích Hợp Modal và Form vào Trang Quản Lý
+2.1. Chuẩn bị Backend và Frontend Service:	backend/controllers/category.controller.js
+						backend/routes/category.routes.js (tạo mới)
+						backend/server.js
+						frontend/src/services/api.js
+2.2. Cập nhật:					frontend/src/pages/admin/ProductManagementPage.jsx
+

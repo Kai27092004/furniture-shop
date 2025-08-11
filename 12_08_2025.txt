@@ -1,0 +1,21 @@
+Nhiệm vụ hôm nay:
+1.Xây dựng Trang Cá Nhân Người Dùng: Nơi người dùng đã đăng nhập có thể xem và cập nhật thông tin cá nhân cũng như xem lại lịch sử các đơn hàng đã đặt.
+2.Đặt Nền Móng Cho Trang Admin: Tạo ra một khu vực quản trị riêng biệt, được bảo vệ, nơi chỉ có admin mới có thể truy cập để quản lý cửa hàng.
+
+Phần 1
+BackEnd
+Phần 1: Xây Dựng Trang Cá Nhân Người Dùng (/profile)
+1. Tạo Controller mới cho User: 	backend/src/controllers/user.controller.js
+2. Tạo Route mới cho User:		backend/src/routes/user.routes.js
+3. Đăng ký Route mới trong server.js
+FrontEnd
+1. Cập nhật API Service:			frontend/src/services/api.js
+2. Tạo Component ProtectedRoute:		frontend/src/components/ProtectedRoute.jsx
+3. Tạo Trang Profile:				frontend/src/pages/ProfilePage.jsx
+4. Áp dụng ProtectedRoute:			frontend/src/App.jsx
+
+Phần 2
+FrontEnd
+1. Tạo AdminRoute:				frontend/src/components/AdminRoute.jsx
+2. Tạo trang Admin Dashboard cơ bản:		frontend/src/pages/AdminDashboardPage.jsx
+3. Áp dụng AdminRoute:				frontend/src/App.jsx

@@ -10,5 +10,7 @@ router.get('/:id', controller.getProductById);
 
 // Route này yêu cầu phải đăng nhập và là Admin
 router.post('/', [isAuthenticated, isAdmin], controller.createProduct);
+router.put('/:id', [isAuthenticated, isAdmin], controller.updateProduct);    // <-- ROUTE MỚI
+router.delete('/:id', [isAuthenticated, isAdmin], controller.deleteProduct); // <-- ROUTE MỚI
 
 module.exports = router;

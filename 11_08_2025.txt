@@ -20,3 +20,4 @@ Phần 3: Xây Dựng Trang Giỏ Hàng
 3.1. Tạo Route và Trang Giỏ Hàng
 1.Thêm Route: 							frontend/src/App.jsx và thêm route.
 2.Tạo Page Component: 						Tạo file CartPage.jsx trong frontend/src/pages
+

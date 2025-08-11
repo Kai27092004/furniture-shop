@@ -31,6 +31,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/products', require('./routes/product.routes'));
 app.use('/api/users', require('./routes/user.routes'));
+app.use('/api/categories', require('./routes/category.routes'));
+app.use('/api/orders', require('./routes/order.routes'));
 // Thêm các routes khác ở đây...
 
 const PORT = process.env.PORT || 8080;

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as loginService } from '../services/api'; // Import hàm login từ service
+import { login as loginService } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -7,9 +7,8 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true); // <-- THÊM DÒNG NÀY: State để kiểm tra auth ban đầu
 
-    // Kiểm tra xem có thông tin user trong localStorage không khi ứng dụng khởi động
     useEffect(() => {
         try {
             const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -18,8 +17,12 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error("Failed to parse user from localStorage", error);
+            // Nếu có lỗi, đảm bảo user là null
+            setUser(null);
+            localStorage.removeItem('user');
         } finally {
-            setLoading(false); // Kết thúc loading
+            // Dù thành công hay thất bại, cũng phải kết thúc loading
+            setLoading(false); // <-- THÊM DÒNG NÀY
         }
     }, []);
 
@@ -32,7 +35,6 @@ export const AuthProvider = ({ children }) => {
             return userData;
         } catch (error) {
             console.error("Login failed", error);
-            // Ném lỗi ra để component có thể bắt và xử lý
             throw error;
         }
     };
@@ -42,11 +44,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
     };
 
-    const value = { user, login, logout, isAuthenticated: !!user, loading };
+    const value = { user, login, logout, isAuthenticated: !!user, loading }; // <-- Thêm `loading` vào value
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {/* Chỉ render các component con khi không còn loading */}
+            {!loading && children} 
         </AuthContext.Provider>
     );
 };
