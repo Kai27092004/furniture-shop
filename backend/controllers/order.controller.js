@@ -49,7 +49,12 @@ exports.createOrder = async (req, res) => {
 
         // Nếu mọi thứ thành công, commit transaction
         await t.commit();
-        res.status(201).send({ message: "Đặt hàng thành công!", orderId: order.id });
+        // <-- CHÚ THÍCH: Cập nhật dòng này để trả về thêm totalAmount của đơn hàng
+        res.status(201).send({ 
+            message: "Đặt hàng thành công!", 
+            orderId: order.id,
+            totalAmount: order.totalAmount // Trả về tổng tiền
+        });
 
     } catch (error) {
         // Nếu có lỗi, rollback tất cả thay đổi

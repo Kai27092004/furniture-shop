@@ -6,6 +6,11 @@ const Category = db.Category;
 
 // Lấy tất cả sản phẩm (có thể kèm theo lọc và phân trang sau này)
 exports.getAllProducts = async (req, res) => {
+    const { categoryId } = req.query;
+    const whereCondition = {};
+    if (categoryId) {
+        whereCondition.categoryId = categoryId;
+    }
     try {
         const products = await Product.findAll({
             include: [{

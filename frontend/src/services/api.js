@@ -35,6 +35,7 @@ export const fetchProductById = (id) => API.get(`/products/${id}`);
 export const createProduct = (productData) => API.post('/products', productData); // Thêm hàm này
 export const updateProduct = (id, productData) => API.put(`/products/${id}`, productData); // Thêm hàm này
 export const deleteProduct = (id) => API.delete(`/products/${id}`); // Thêm hàm này
+export const fetchProductsByCategory = (categoryId) => API.get(`/products?categoryId=${categoryId}`);
 // ### PHẦN CODE ĐƯỢC THÊM VÀO THEO HƯỚNG DẪN Ở BƯỚC NÀY ###
 // ##################################################################
 

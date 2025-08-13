@@ -1,9 +1,29 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext'; // Sẽ dùng ở phần 2
+import { Link, useNavigate } from 'react-router-dom'; // <-- THÊM MỚI: Import useNavigate
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';    // <-- THÊM MỚI: Import useAuth để kiểm tra đăng nhập
 
 const ProductCard = ({ product }) => {
-    const { addToCart } = useCart(); // Sẽ dùng ở phần 2
+    const { addToCart } = useCart();
+    
+    // --- PHẦN THÊM MỚI BẮT ĐẦU TỪ ĐÂY ---
+    const { isAuthenticated } = useAuth(); // Lấy trạng thái đăng nhập
+    const navigate = useNavigate(); // Hook để điều hướng trang
+
+    // Hàm xử lý logic khi nhấn nút
+    const handleAddToCart = () => {
+        // Kiểm tra xem người dùng đã đăng nhập chưa
+        if (isAuthenticated) {
+            // Nếu đã đăng nhập, thực hiện thêm vào giỏ hàng
+            addToCart(product);
+            alert('Đã thêm sản phẩm vào giỏ hàng!'); // Có thể thay bằng một thông báo đẹp hơn
+        } else {
+            // Nếu chưa, thông báo và chuyển hướng đến trang đăng nhập
+            alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.');
+            navigate('/login');
+        }
+    };
+    // --- KẾT THÚC PHẦN THÊM MỚI ---
 
     return (
         <div className="bg-white border rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden">
@@ -19,9 +39,10 @@ const ProductCard = ({ product }) => {
                     <p className="text-xl font-bold text-blue-600">
                         {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
                     </p>
-                    <button
-                        onClick={() => addToCart(product)}
-                        className="..."
+                    {/* <-- CHÚ THÍCH: Thay đổi onClick để gọi hàm handleAddToCart mới */}
+                    <button 
+                        onClick={handleAddToCart}
+                        className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-black transition-colors text-sm font-semibold"
                     >
                         Thêm vào giỏ
                     </button>

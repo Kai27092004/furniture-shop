@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; 
 import { fetchProductById } from '../services/api';
 import { useCart } from '../context/CartContext'; // Sẽ dùng ở phần 2
+import { useAuth } from '../context/AuthContext'; 
 
 const ProductDetailPage = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const { id } = useParams(); // Lấy ID từ URL
     const { addToCart } = useCart(); // Sẽ dùng ở phần 2
+
+    // --- PHẦN THÊM MỚI BẮT ĐẦU TỪ ĐÂY ---
+    const { isAuthenticated } = useAuth(); // Lấy trạng thái đăng nhập
+    const navigate = useNavigate(); // Hook để điều hướng trang
+
+    const handleAddToCart = () => {
+        if (isAuthenticated) {
+            addToCart(product);
+            alert('Đã thêm sản phẩm vào giỏ hàng!');
+        } else {
+            alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.');
+            navigate('/login');
+        }
+    };
+    // --- KẾT THÚC PHẦN THÊM MỚI ---
 
     useEffect(() => {
         const getProduct = async () => {
