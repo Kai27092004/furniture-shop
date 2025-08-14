@@ -1,12 +1,11 @@
 // File: frontend/src/pages/CartPage.jsx
 
-// <-- CHÚ THÍCH: Các import của bạn đã đúng, chúng ta chỉ cần thêm import cho Modal giả lập.
+// <-- CHÚ THÍCH: Import thêm hàm updateOrderStatus từ API service.
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { createOrder } from '../services/api';
-// <-- THÊM MỚI: Import component Modal giả lập QR mà chúng ta đã tạo.
+import { createOrder, updateOrderStatus } from '../services/api'; // <--- THÊM updateOrderStatus
 import SimulatedQRModal from '../components/SimulatedQRModal';
 
 const CartPage = () => {
@@ -15,16 +14,11 @@ const CartPage = () => {
     const navigate = useNavigate();
     const [shippingAddress, setShippingAddress] = useState('');
     const [error, setError] = useState('');
-
-    // <-- THÊM MỚI: State để quản lý việc mở/đóng cửa sổ QR giả lập.
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
-    // <-- THAY ĐỔI: Tên hàm được đổi để rõ nghĩa hơn. Hàm này giờ chỉ có nhiệm vụ MỞ MODAL.
     const handleProceedToCheckout = (e) => {
         e.preventDefault();
         setError('');
-
-        // Các bước kiểm tra đăng nhập và địa chỉ vẫn giữ nguyên
         if (!isAuthenticated) {
             alert('Vui lòng đăng nhập để có thể đặt hàng.');
             navigate('/login');
@@ -34,37 +28,47 @@ const CartPage = () => {
             setError('Vui lòng nhập địa chỉ giao hàng.');
             return;
         }
-
-        // <-- THAY ĐỔI: Thay vì gọi API, hàm này sẽ mở cửa sổ Modal giả lập.
         setIsQrModalOpen(true);
     };
 
-    // <-- THÊM MỚI: Hàm này chứa logic tạo đơn hàng. Nó sẽ được gọi khi người dùng nhấn "Hoàn tất" trong Modal.
+    // --- PHẦN THAY ĐỔI LOGIC NẰM Ở ĐÂY ---
+    // <-- CHÚ THÍCH: Hàm này được gọi khi người dùng nhấn "Hoàn tất" trong Modal giả lập.
     const handlePaymentComplete = async () => {
         try {
-            // Gọi API để tạo đơn hàng trong database
-            await createOrder({
+            // BƯỚC 1: Gọi API để tạo đơn hàng. Đơn hàng sẽ có status mặc định là 'pending'.
+            const response = await createOrder({
                 cartItems: cartItems,
                 shippingAddress: shippingAddress,
             });
             
-            setIsQrModalOpen(false); // Đóng modal sau khi thành công
-            alert('Đặt hàng thành công!');
+            const newOrder = response.data; // Lấy dữ liệu đơn hàng mới (bao gồm orderId)
+
+            // BƯỚC 2: Ngay sau khi tạo thành công, gọi API thứ hai để cập nhật trạng thái.
+            // <-- THAY ĐỔI: Thêm bước gọi API updateOrderStatus.
+            // Chúng ta cập nhật trạng thái thành "processing", coi như "đã thanh toán".
+            if (newOrder && newOrder.orderId) {
+                await updateOrderStatus(newOrder.orderId, 'processing');
+            }
+            
+            // BƯỚC 3: Hoàn tất quy trình và thông báo cho người dùng.
+            setIsQrModalOpen(false); // Đóng modal
+            alert('Đặt hàng và thanh toán thành công!');
             clearCart(); // Xóa giỏ hàng
             navigate('/profile'); // Chuyển đến trang cá nhân
 
         } catch (err) {
-            // Xử lý nếu server trả về lỗi
+            // Xử lý nếu có lỗi ở bất kỳ bước nào.
             const errorMessage = err.response?.data?.message || 'Đã có lỗi xảy ra khi đặt hàng.';
             setError(errorMessage);
             alert(`Đặt hàng thất bại: ${errorMessage}`);
             setIsQrModalOpen(false); // Đóng modal nếu có lỗi
         }
     };
+    // --- KẾT THÚC PHẦN THAY ĐỔI LOGIC ---
 
 
     if (cartItems.length === 0) {
-        // Phần này giữ nguyên, không thay đổi
+        // Phần này giữ nguyên, không thay đổi.
         return (
             <div className="text-center py-20">
                 <h1 className="text-3xl font-bold text-gray-700">Giỏ hàng của bạn đang trống</h1>
@@ -75,15 +79,12 @@ const CartPage = () => {
         );
     }
 
-    // <-- CHÚ THÍCH: Bọc toàn bộ return trong một React Fragment <>...</>
     return (
         <>
-            {/* <-- THAY ĐỔI: Sự kiện onSubmit của form sẽ gọi hàm handleProceedToCheckout mới. */}
             <form onSubmit={handleProceedToCheckout} className="bg-white shadow-lg rounded-lg p-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-6">Giỏ Hàng Của Bạn</h1>
                 {error && <p className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center">{error}</p>}
                 
-                {/* Phần hiển thị danh sách sản phẩm và các ô input được giữ nguyên */}
                 <div className="space-y-4">
                     {cartItems.map(item => (
                         <div key={item.id} className="flex items-center justify-between border-b pb-4">
@@ -133,12 +134,11 @@ const CartPage = () => {
                 </div>
             </form>
 
-            {/* <-- THÊM MỚI: Render component Modal giả lập và truyền các props cần thiết cho nó. --> */}
             <SimulatedQRModal
                 isOpen={isQrModalOpen}
-                onClose={() => setIsQrModalOpen(false)} // Khi hủy, chỉ cần đóng modal.
-                onComplete={handlePaymentComplete}      // Khi hoàn tất, gọi hàm để tạo đơn hàng.
-                totalAmount={cartTotal}                 // Truyền tổng tiền vào modal để hiển thị.
+                onClose={() => setIsQrModalOpen(false)}
+                onComplete={handlePaymentComplete}
+                totalAmount={cartTotal}
             />
         </>
     );

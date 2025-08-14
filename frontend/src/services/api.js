@@ -47,5 +47,8 @@ export const fetchCategories = () => API.get('/categories');
 // Hàm gọi API để lấy lịch sử đơn hàng của người dùng đang đăng nhập
 export const fetchMyOrders = () => API.get('/users/my-orders');
 export const createOrder = (orderData) => API.post('/orders', orderData);
+// Hủy một đơn hàng
+export const cancelOrder = (orderId) => API.put(`/orders/${orderId}/cancel`);
+export const updateOrderStatus = (orderId, status) => API.put(`/orders/${orderId}/status`, { status });
 
 export default API;
