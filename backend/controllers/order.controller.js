@@ -167,3 +167,15 @@ exports.updateOrderStatus = async (req, res) => {
         res.status(500).send({ message: "Lỗi khi cập nhật trạng thái đơn hàng: " + error.message });
     }
 };
+// [ADMIN] Lấy tất cả đơn hàng
+exports.getAllOrders = async (req, res) => {
+    try {
+        const orders = await db.Order.findAll({
+            order: [['createdAt', 'DESC']],
+            include: [{ model: db.User, as: 'user', attributes: ['id', 'fullName', 'email'] }]
+        });
+        res.status(200).send(orders);
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+};

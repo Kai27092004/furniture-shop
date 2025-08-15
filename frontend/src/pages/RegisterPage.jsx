@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../services/api';
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -11,6 +12,9 @@ const RegisterPage = () => {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -22,72 +26,112 @@ const RegisterPage = () => {
         setError('');
         setSuccess('');
 
-        // Kiểm tra mật khẩu có khớp không ở phía client
         if (formData.password !== formData.confirmPassword) {
             setError('Mật khẩu xác nhận không khớp.');
             return;
         }
 
+        setIsLoading(true);
         try {
-            // Gọi API đăng ký
-            const response = await register({
+            await register({
                 fullName: formData.fullName,
                 email: formData.email,
                 password: formData.password
             });
-            setSuccess(response.data.message + ' Bạn sẽ được chuyển đến trang đăng nhập sau 3 giây.');
-            
-            // Tự động chuyển đến trang đăng nhập sau 3 giây
-            setTimeout(() => {
-                navigate('/login');
-            }, 3000);
-
+            setSuccess('Đăng ký thành công! Đang chuyển đến trang đăng nhập...');
+            setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            // Hiển thị lỗi từ server (ví dụ: email đã tồn tại)
             const errorMessage = err.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.';
             setError(errorMessage);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="max-w-md mx-auto mt-10">
-            <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <h2 className="text-2xl font-bold text-center mb-6">Tạo Tài Khoản Mới</h2>
-                
-                {/* Hiển thị thông báo lỗi hoặc thành công */}
-                {error && <p className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center">{error}</p>}
-                {success && <p className="bg-green-100 text-green-700 p-3 rounded mb-4 text-center">{success}</p>}
+        <div className="min-h-screen bg-gradient-to-br from-[#f9f8f4] via-[#f5f4f0] to-[#f1f0ec] flex items-center justify-center p-4">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `radial-gradient(circle at 20% 50%, #A25F4B 1px, transparent 1px), radial-gradient(circle at 80% 50%, #8B4A3A 1px, transparent 1px)`,
+                    backgroundSize: '100px 100px'
+                }}></div>
+            </div>
 
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="fullName">Họ và Tên</label>
-                    <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="fullName" name="fullName" type="text" placeholder="Nguyễn Văn A" value={formData.fullName} onChange={handleChange} required />
+            <div className="relative w-full max-w-md">
+                {/* Main Form Container */}
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+                    {/* Header with gradient */}
+                    <div className="bg-gradient-to-r from-[#A25F4B] to-[#8B4A3A] px-8 py-8 text-center">
+                        <h1 className="text-3xl font-bold text-white">Đăng ký miễn phí</h1>
+                        {/* ĐÃ XÓA: Dấu gạch dưới */}
+                    </div>
+
+                    {/* Form Content */}
+                    <div className="p-8">
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            {error && <p className="bg-red-100 text-red-700 p-3 rounded-xl text-center text-sm">{error}</p>}
+                            {success && <p className="bg-green-100 text-green-700 p-3 rounded-xl text-center text-sm">{success}</p>}
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Họ và tên</label>
+                                <div className="relative">
+                                    <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Nguyễn Văn A" className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:border-[#A25F4B] focus:ring-2 focus:ring-[#A25F4B]/20 outline-none transition-all duration-200 placeholder-gray-400" required />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Email</label>
+                                <div className="relative">
+                                    <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="example@shopnk.com" className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:border-[#A25F4B] focus:ring-2 focus:ring-[#A25F4B]/20 outline-none transition-all duration-200 placeholder-gray-400" required />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                                <div className="relative">
+                                    <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} placeholder="Tối thiểu 8 ký tự" className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:border-[#A25F4B] focus:ring-2 focus:ring-[#A25F4B]/20 outline-none transition-all duration-200 placeholder-gray-400" required minLength="8" />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#A25F4B] transition-colors duration-200">
+                                        {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
+                                <div className="relative">
+                                    <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                                    <input type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Nhập lại mật khẩu" className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:border-[#A25F4B] focus:ring-2 focus:ring-[#A25F4B]/20 outline-none transition-all duration-200 placeholder-gray-400" required />
+                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#A25F4B] transition-colors duration-200">
+                                        {showConfirmPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" disabled={isLoading || !!success} className="w-full bg-gradient-to-r from-[#A25F4B] to-[#8B4A3A] text-white font-semibold py-3 px-4 rounded-xl hover:from-[#8B4A3A] hover:to-[#7A3F2F] focus:outline-none focus:ring-2 focus:ring-[#A25F4B]/50 focus:ring-offset-2 transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Đang tạo tài khoản...</span>
+                                    </div>
+                                ) : (
+                                    'Tạo tài khoản'
+                                )}
+                            </button>
+
+                            <div className="text-center">
+                                <span className="text-gray-600">Đã có tài khoản? </span>
+                                <Link to="/login" className="text-[#A25F4B] hover:text-[#8B4A3A] font-semibold hover:underline transition-colors duration-200">
+                                    Đăng nhập ngay
+                                </Link>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
-                    <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="email" name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-                </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Mật khẩu</label>
-                    <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="password" name="password" type="password" placeholder="******************" value={formData.password} onChange={handleChange} required />
-                </div>
-                <div className="mb-6">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">Xác nhận Mật khẩu</label>
-                    <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" id="confirmPassword" name="confirmPassword" type="password" placeholder="******************" value={formData.confirmPassword} onChange={handleChange} required />
-                </div>
-                <div className="flex items-center justify-between">
-                    <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" type="submit">
-                        Đăng Ký
-                    </button>
-                </div>
-                <div className="text-center mt-4">
-                    <p className="text-sm text-gray-600">
-                        Đã có tài khoản?{' '}
-                        <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                            Đăng nhập tại đây
-                        </Link>
-                    </p>
-                </div>
-            </form>
+            </div>
         </div>
     );
 };

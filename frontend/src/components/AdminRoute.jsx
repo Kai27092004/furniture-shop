@@ -9,11 +9,12 @@ const AdminRoute = ({ children }) => {
     if (loading) {
         return null; // Hoặc <p>Loading...</p>
     }
-    
+
     if (!isAuthenticated) {
-        return <Navigate to="/login" state={{ from: location }} replace />; // <-- Thêm state
+        // Chuyển về trang đăng nhập của Admin
+        return <Navigate to="/admin/login" state={{ from: location }} replace />;
     }
-    
+
     if (user.role !== 'admin') {
         return <Navigate to="/" replace />; // Nếu không phải admin, đá về trang chủ
     }

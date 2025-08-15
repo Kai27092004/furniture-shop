@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/order.controller');
 const { isAuthenticated } = require('../middleware/auth.middleware');
+const { isAdmin } = require('../middleware/auth.middleware');
 
 // Route để tạo đơn hàng mới, yêu cầu phải đăng nhập
 router.post('/', isAuthenticated, controller.createOrder);
@@ -9,5 +10,7 @@ router.post('/', isAuthenticated, controller.createOrder);
 router.put('/:orderId/cancel', isAuthenticated, controller.cancelOrder);
 router.put('/:orderId/status', isAuthenticated, controller.updateOrderStatus);
 
+// Route cho admin
+router.get('/all', isAuthenticated, isAdmin, controller.getAllOrders);
 
 module.exports = router;

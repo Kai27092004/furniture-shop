@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Import các Layout
 import MainLayout from './components/MainLayout';
@@ -21,18 +21,42 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
+
+// Import các trang Admin
+import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProductManagementPage from './pages/admin/ProductManagementPage';
+// <-- CHÚ THÍCH: Import 3 trang placeholder vừa tạo -->
+import OrderManagementPage from './pages/admin/OrderManagementPage';
+import CategoryManagementPage from './pages/admin/CategoryManagementPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
 
 
 function App() {
   return (
     <Routes>
-      {/* --- CÁC ROUTE SỬ DỤNG MAINLAYOUT (CHO NGƯỜI DÙNG) --- */}
-      {/* CHÚ THÍCH: Tất cả các Route bên trong sẽ được bọc bởi MainLayout */}
+      {/* --- ROUTE ĐĂNG NHẬP ADMIN (Nằm riêng, không dùng layout nào) --- */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+
+      {/* --- CÁC ROUTE CỦA ADMIN (Sử dụng AdminLayout) --- */}
+      <Route 
+        path="/admin" 
+        element={ <AdminRoute> <AdminLayout /> </AdminRoute> }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} /> 
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="products" element={<ProductManagementPage />} />
+        
+        {/* <-- CHÚ THÍCH: Thêm các route cho các trang quản lý mới ở đây --> */}
+        <Route path="orders" element={<OrderManagementPage />} />
+        <Route path="categories" element={<CategoryManagementPage />} />
+        <Route path="users" element={<UserManagementPage />} />
+
+      </Route>
+
+      {/* --- CÁC ROUTE CỦA USER (Sử dụng MainLayout) --- */}
       <Route path="/" element={<MainLayout />}>
-        {/* Các trang công khai */}
-        <Route index element={<HomePage />} /> {/* 'index' có nghĩa là đây là trang cho path="/" */}
+        <Route index element={<HomePage />} />
         <Route path="products" element={<ProductListPage />} />
         <Route path="products/:id" element={<ProductDetailPage />} />
         <Route path="category/:categoryId" element={<ProductsByCategoryPage />} />
@@ -40,31 +64,11 @@ function App() {
         <Route path="news" element={<NewsPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="cart" element={<CartPage />} />
-
-        {/* Các trang xác thực */}
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
-
-        {/* Các trang được bảo vệ */}
-        <Route 
-            path="profile" 
-            element={ <ProtectedRoute> <ProfilePage /> </ProtectedRoute> } 
-        />
-      </Route>
-
-      {/* --- CÁC ROUTE SỬ DỤNG ADMINLAYOUT (CHO ADMIN) --- */}
-      {/* CHÚ THÍCH: Tất cả các Route bên trong sẽ được bọc bởi AdminLayout và được bảo vệ bởi AdminRoute */}
-      <Route 
-        path="/admin" 
-        element={ <AdminRoute> <AdminLayout /> </AdminRoute> }
-      >
-        {/* React Router v6 sẽ tự hiểu "dashboard" là "/admin/dashboard" */}
-        <Route path="dashboard" element={<AdminDashboardPage />} />
-        <Route path="products" element={<ProductManagementPage />} />
+        <Route path="profile" element={ <ProtectedRoute> <ProfilePage /> </ProtectedRoute> } />
       </Route>
       
-      {/* Bạn có thể thêm Route cho trang 404 Not Found ở đây */}
-      {/* <Route path="*" element={<NotFoundPage />} /> */}
     </Routes>
   );
 }

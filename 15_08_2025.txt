@@ -1,0 +1,17 @@
+Nhiệm vụ hôm nay:
+1. Phân tách khu vực người dùng và khu vực quản trị
+Khu vực người dùng: các trang hiển thị cho khách hàng (ví dụ: Trang chủ, Sản phẩm, Liên hệ...).
+Khu vực quản trị: truy cập qua đường dẫn /admin/login.
+2. Đăng nhập Admin
+Trang /admin/login gồm form nhập username và password.
+Chỉ tài khoản có quyền Admin mới đăng nhập được.
+Sau khi đăng nhập thành công, chuyển đến /admin/dashboard.
+Nếu chưa đăng nhập mà vào /admin/..., tự động chuyển về /admin/login.
+3. Khu vực quản trị (Admin Panel)
+Navbar hoặc sidebar riêng cho Admin.
+Gồm 5 trang:
+Trang Quản Trị (/admin/dashboard) – hiển thị thống kê nhanh.
+Quản lý đơn hàng (/admin/orders).
+Quản lý danh mục (/admin/categories).
+Quản lý sản phẩm (/admin/products).
+Quản lý người dùng (/admin/users).
