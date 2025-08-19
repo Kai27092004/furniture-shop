@@ -1,18 +1,15 @@
-// File: frontend/src/pages/CartPage.jsx
-
-// <-- CHÚ THÍCH: Import thêm hàm updateOrderStatus từ API service.
 import React, { useState } from 'react';
-import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, updateOrderStatus } from '../services/api'; // <--- THÊM updateOrderStatus
+import { createOrder, updateOrderStatus } from '../services/api';
 import SimulatedQRModal from '../components/SimulatedQRModal';
+import { FaTrash } from "react-icons/fa";
 
 const CartPage = () => {
-    const { cartItems, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
+    const { cartItems, cartTotal, updateQuantity, removeFromCart, clearCart } = useCart();
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
-    const [shippingAddress, setShippingAddress] = useState('');
     const [error, setError] = useState('');
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
@@ -21,58 +18,52 @@ const CartPage = () => {
         setError('');
         if (!isAuthenticated) {
             alert('Vui lòng đăng nhập để có thể đặt hàng.');
-            navigate('/login');
-            return;
-        }
-        if (!shippingAddress.trim()) {
-            setError('Vui lòng nhập địa chỉ giao hàng.');
+            navigate('/login', { state: { from: '/cart' } });
             return;
         }
         setIsQrModalOpen(true);
     };
 
-    // --- PHẦN THAY ĐỔI LOGIC NẰM Ở ĐÂY ---
-    // <-- CHÚ THÍCH: Hàm này được gọi khi người dùng nhấn "Hoàn tất" trong Modal giả lập.
     const handlePaymentComplete = async () => {
         try {
-            // BƯỚC 1: Gọi API để tạo đơn hàng. Đơn hàng sẽ có status mặc định là 'pending'.
-            const response = await createOrder({
+            // --- SỬA LỖI TẠI ĐÂY ---
+            // Thêm một địa chỉ mặc định để đáp ứng yêu cầu của backend
+            const orderData = {
                 cartItems: cartItems,
-                shippingAddress: shippingAddress,
-            });
-            
-            const newOrder = response.data; // Lấy dữ liệu đơn hàng mới (bao gồm orderId)
+                shippingAddress: 'Tại quầy', // Gửi giá trị mặc định
+            };
 
-            // BƯỚC 2: Ngay sau khi tạo thành công, gọi API thứ hai để cập nhật trạng thái.
-            // <-- THAY ĐỔI: Thêm bước gọi API updateOrderStatus.
-            // Chúng ta cập nhật trạng thái thành "processing", coi như "đã thanh toán".
+            const response = await createOrder(orderData);
+            // --- KẾT THÚC SỬA LỖI ---
+            
+            const newOrder = response.data;
             if (newOrder && newOrder.orderId) {
                 await updateOrderStatus(newOrder.orderId, 'processing');
             }
-            
-            // BƯỚC 3: Hoàn tất quy trình và thông báo cho người dùng.
-            setIsQrModalOpen(false); // Đóng modal
+            setIsQrModalOpen(false);
             alert('Đặt hàng và thanh toán thành công!');
-            clearCart(); // Xóa giỏ hàng
-            navigate('/profile'); // Chuyển đến trang cá nhân
+            clearCart();
+            navigate('/profile');
 
         } catch (err) {
-            // Xử lý nếu có lỗi ở bất kỳ bước nào.
             const errorMessage = err.response?.data?.message || 'Đã có lỗi xảy ra khi đặt hàng.';
             setError(errorMessage);
-            alert(`Đặt hàng thất bại: ${errorMessage}`);
-            setIsQrModalOpen(false); // Đóng modal nếu có lỗi
+            // Thêm "Lỗi từ server:" để dễ nhận biết hơn
+            alert(`Đặt hàng thất bại: Lỗi từ server: ${errorMessage}`);
+            setIsQrModalOpen(false);
         }
     };
-    // --- KẾT THÚC PHẦN THAY ĐỔI LOGIC ---
 
+    const formatVND = (n) => {
+        return n.toLocaleString("vi-VN") + "₫";
+    };
 
     if (cartItems.length === 0) {
-        // Phần này giữ nguyên, không thay đổi.
         return (
-            <div className="text-center py-20">
-                <h1 className="text-3xl font-bold text-gray-700">Giỏ hàng của bạn đang trống</h1>
-                <Link to="/products" className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+            <div className="text-center p-10 min-h-[60vh] flex flex-col justify-center items-center bg-gray-50">
+                <h1 className="text-2xl sm:text-3xl font-semibold mb-4 text-gray-800">Giỏ hàng của bạn đang trống</h1>
+                <p className="text-gray-600 mb-6">Hãy khám phá và thêm những sản phẩm nội thất tinh tế vào giỏ hàng nhé!</p>
+                <Link to="/products" className="bg-[#A25F4B] text-white py-3 px-8 rounded-lg hover:bg-[#8B4A3A] transition-colors font-semibold shadow-sm">
                     Tiếp tục mua sắm
                 </Link>
             </div>
@@ -80,67 +71,107 @@ const CartPage = () => {
     }
 
     return (
-        <>
-            <form onSubmit={handleProceedToCheckout} className="bg-white shadow-lg rounded-lg p-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-6">Giỏ Hàng Của Bạn</h1>
-                {error && <p className="bg-red-100 text-red-700 p-3 rounded mb-4 text-center">{error}</p>}
-                
-                <div className="space-y-4">
-                    {cartItems.map(item => (
-                        <div key={item.id} className="flex items-center justify-between border-b pb-4">
-                            <div className="flex items-center space-x-4">
-                                <img src={item.imageUrl} alt={item.name} className="w-20 h-20 rounded object-cover"/>
-                                <div>
-                                    <h2 className="font-semibold text-lg">{item.name}</h2>
-                                    <p className="text-gray-600">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-4">
-                                <input 
-                                    type="number" 
-                                    value={item.quantity} 
-                                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                                    className="w-16 text-center border rounded"
-                                    min="1"
-                                />
-                                <button type="button" onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700">Xóa</button>
+        <form onSubmit={handleProceedToCheckout} className="min-h-screen bg-[#F9F8F4] py-6 sm:py-10">
+            <div className="max-w-6xl mx-auto px-2 sm:px-4">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#3A3A3A] mb-6 sm:mb-8 text-center">
+                    Giỏ hàng của bạn
+                </h1>
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                    {/* Cột trái: Danh sách sản phẩm */}
+                    <div className="flex-1 bg-white rounded-xl shadow-sm p-3 sm:p-6 border border-gray-200">
+                        <div className="overflow-x-auto">
+                            {/* Giao diện Desktop */}
+                            <table className="min-w-[600px] w-full text-sm hidden md:table">
+                                <thead>
+                                    <tr className="text-left text-gray-500 border-b border-gray-200">
+                                        <th className="py-3 font-medium">Sản phẩm</th>
+                                        <th className="py-3 font-medium">Đơn giá</th>
+                                        <th className="py-3 font-medium">Số lượng</th>
+                                        <th className="py-3 font-medium">Tổng</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {cartItems.map((item) => (
+                                        <tr key={item.id} className="border-b border-gray-200 last:border-b-0">
+                                            <td className="py-4 flex items-center gap-4">
+                                                <img src={item.imageUrl} alt={item.name} className="w-20 h-20 rounded-lg object-cover border border-gray-200" />
+                                                <span className="font-bold text-gray-800">{item.name}</span>
+                                            </td>
+                                            <td className="py-4 text-gray-800 font-bold">{formatVND(item.price)}</td>
+                                            <td className="py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <button type="button" className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded hover:bg-gray-200 border border-gray-300" onClick={() => updateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>–</button>
+                                                    <input type="number" value={item.quantity} readOnly className="w-14 h-8 px-2 border border-gray-300 rounded text-center text-gray-800 font-bold" />
+                                                    <button type="button" className="w-8 h-8 flex items-center justify-center bg-gray-100 text-gray-600 rounded hover:bg-gray-200 border border-gray-300" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 font-bold text-[#A25F4B]">{formatVND(item.price * item.quantity)}</td>
+                                            <td className="py-4">
+                                                <button type="button" className="text-gray-400 hover:text-red-500 p-2 rounded-full transition" onClick={() => removeFromCart(item.id)}><FaTrash /></button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {/* Giao diện Mobile */}
+                            <div className="md:hidden space-y-4">
+                                {cartItems.map(item => (
+                                    <div key={item.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-lg object-cover border border-gray-200" />
+                                            <div>
+                                                <p className="font-bold text-gray-800">{item.name}</p>
+                                                <p className="text-sm text-gray-800 font-bold">{formatVND(item.price)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <button type="button" className="w-7 h-7 flex items-center justify-center bg-gray-100 text-gray-600 rounded hover:bg-gray-200 border border-gray-300" onClick={() => updateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>–</button>
+                                                <input type="number" value={item.quantity} readOnly className="w-12 h-7 px-1 border border-gray-300 rounded text-center text-gray-800 font-bold text-sm" />
+                                                <button type="button" className="w-7 h-7 flex items-center justify-center bg-gray-100 text-gray-600 rounded hover:bg-gray-200 border border-gray-300" onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                                            </div>
+                                            <div className="font-bold text-sm text-[#A25F4B]">{formatVND(item.price * item.quantity)}</div>
+                                            <button type="button" className="text-gray-400 hover:text-red-500 p-2" onClick={() => removeFromCart(item.id)}><FaTrash /></button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    ))}
-                </div>
+                    </div>
 
-                <div className="mt-8">
-                    <label htmlFor="shippingAddress" className="block text-lg font-semibold mb-2 text-gray-800">Địa Chỉ Giao Hàng</label>
-                    <textarea
-                        id="shippingAddress"
-                        value={shippingAddress}
-                        onChange={(e) => setShippingAddress(e.target.value)}
-                        className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 transition"
-                        rows="3"
-                        placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."
-                        required
-                    ></textarea>
-                </div>
-                
-                <div className="mt-8 flex justify-end items-center">
-                    <div className="text-right">
-                        <p className="text-xl font-bold text-gray-800">
-                            Tổng cộng: <span className="text-blue-600">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(cartTotal)}</span>
-                        </p>
-                        <button type="submit" className="mt-4 bg-green-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-600 transition-colors">
-                            Xác Nhận Đặt Hàng
-                        </button>
+                    {/* Cột phải: Tóm tắt đơn hàng */}
+                    <div className="w-full lg:w-[350px] flex-shrink-0">
+                        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 sticky top-8 border border-gray-200">
+                            <h2 className="font-bold text-gray-800 mb-4 text-lg">Đơn hàng của bạn</h2>
+                            <div className="border-b border-gray-200 pb-2 mb-2">
+                                {cartItems.map((item) => (
+                                    <div key={item.id} className="flex justify-between items-center text-sm mb-1">
+                                        <span className="text-gray-600 truncate pr-2 font-bold">{item.name} <span className="text-gray-400 font-medium">× {item.quantity}</span></span>
+                                        <span className="font-medium text-gray-700">{formatVND(item.price * item.quantity)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex justify-between font-bold text-lg mt-4 mb-4">
+                                <span className="text-gray-800">Tổng cộng</span>
+                                <span className="text-[#A25F4B]">{formatVND(cartTotal)}</span>
+                            </div>
+                            {error && <p className="text-sm text-red-600 my-2 text-center">{error}</p>}
+                            <button type="submit" className="w-full px-6 py-3 rounded-lg bg-[#A25F4B] text-white font-semibold shadow-sm hover:bg-[#8B4A3A] transition text-base">
+                                Xác Nhận Đặt Hàng
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </form>
-
+            </div>
+            
             <SimulatedQRModal
                 isOpen={isQrModalOpen}
                 onClose={() => setIsQrModalOpen(false)}
                 onComplete={handlePaymentComplete}
                 totalAmount={cartTotal}
             />
-        </>
+        </form>
     );
 };
 
