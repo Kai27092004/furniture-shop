@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
+// CHÚ THÍCH SỬA ĐỔI: Thêm `useNavigate` để điều hướng trang
+import { useNavigate } from 'react-router-dom';
 import { fetchUserProfile, fetchMyOrders, cancelOrder, updateOrderStatus } from '../services/api';
-import SimulatedQRModal from '../components/SimulatedQRModal';
 
 const ProfilePage = () => {
     const [profile, setProfile] = useState(null);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+
     
-    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
-    const [currentOrderInfo, setCurrentOrderInfo] = useState(null);
+    // CHÚ THÍCH SỬA ĐỔI: Khởi tạo hook `useNavigate`
+    const navigate = useNavigate();
 
     const getStatusText = (status) => {
         switch (status) {
@@ -39,29 +41,11 @@ const ProfilePage = () => {
         loadData();
     }, []);
     
+    // CHÚ THÍCH SỬA ĐỔI: Hàm này được viết lại để điều hướng đến trang PaymentPage
     const handleContinuePayment = (order) => {
-        setCurrentOrderInfo({ id: order.id, amount: order.totalAmount });
-        setIsQrModalOpen(true);
+        navigate(`/payment/${order.id}`);
     };
 
-    const handleCloseQrModal = () => {
-        setIsQrModalOpen(false);
-        setCurrentOrderInfo(null);
-    };
-
-    const handlePaymentComplete = async () => {
-        if (!currentOrderInfo) return;
-        try {
-            await updateOrderStatus(currentOrderInfo.id, 'processing');
-            setIsQrModalOpen(false);
-            alert('Xác nhận thanh toán thành công!');
-            loadData();
-        } catch (error) {
-            const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi xác nhận thanh toán.";
-            alert(`Lỗi: ${errorMessage}`);
-            setIsQrModalOpen(false);
-        }
-    };
 
     const handleCancelOrder = async (orderId) => {
         if (window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) {
@@ -76,13 +60,17 @@ const ProfilePage = () => {
         }
     };
 
-    if (loading) return <p className="text-center mt-10">Đang tải trang hồ sơ...</p>;
-    if (!profile) return <p className="text-center mt-10 text-red-500">Không thể tải thông tin cá nhân.</p>;
+    if (loading) {
+        return <p className="text-center">Đang tải...</p>;
+    }
+
+    if (!profile) {
+        return <p className="text-center text-red-500">Không thể tải thông tin cá nhân.</p>;
+    }
 
     return (
         <>
             <div className="container mx-auto p-4 space-y-8">
-                {/* Phần thông tin cá nhân (Giữ nguyên) */}
                 <div className="bg-white p-6 rounded-lg shadow-md flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
                     <div className="flex flex-col items-center md:items-center md:flex-row gap-4 w-full md:w-auto">
                         <img
@@ -101,7 +89,6 @@ const ProfilePage = () => {
                     </div>
                 </div>
 
-                {/* --- PHẦN LỊCH SỬ ĐƠN HÀNG ĐÃ ĐƯỢC CẬP NHẬT GIAO DIỆN --- */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-2xl font-semibold mb-4">Lịch Sử Đơn Hàng</h2>
                     {orders.length > 0 ? (
@@ -113,7 +100,7 @@ const ProfilePage = () => {
                                     statusColor = 'bg-green-100 text-green-800';
                                 } else if (order.status === 'cancelled') {
                                     statusColor = 'bg-red-100 text-red-800';
-                                } else { // pending
+                                } else {
                                     statusColor = 'bg-yellow-100 text-yellow-800';
                                 }
                                 
@@ -161,13 +148,6 @@ const ProfilePage = () => {
                     )}
                 </div>
             </div>
-            
-            <SimulatedQRModal
-                isOpen={isQrModalOpen}
-                onClose={handleCloseQrModal}
-                onComplete={handlePaymentComplete}
-                totalAmount={currentOrderInfo?.amount || 0}
-            />
         </>
     );
 };

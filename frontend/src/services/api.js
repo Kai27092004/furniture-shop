@@ -32,17 +32,20 @@ export const register = (userData) => API.post('/auth/register', userData);
 // --- Products ---
 export const fetchProducts = () => API.get('/products');
 export const fetchProductById = (id) => API.get(`/products/${id}`);
-export const createProduct = (productData) => API.post('/products', productData); // Thêm hàm này
-export const updateProduct = (id, productData) => API.put(`/products/${id}`, productData); // Thêm hàm này
-export const deleteProduct = (id) => API.delete(`/products/${id}`); // Thêm hàm này
+export const createProduct = (productData) => API.post('/products', productData);
+export const updateProduct = (id, productData) => API.put(`/products/${id}`, productData);
+export const deleteProduct = (id) => API.delete(`/products/${id}`);
 export const fetchProductsByCategory = (categoryId) => API.get(`/products?categoryId=${categoryId}`);
-// ### PHẦN CODE ĐƯỢC THÊM VÀO THEO HƯỚNG DẪN Ở BƯỚC NÀY ###
+
+// --- Categories ---
+// ### DÒNG CODE ĐƯỢC THÊM VÀO THEO HƯỚNG DẪN ###
+export const fetchCategories = () => API.get('/categories');
 // ##################################################################
+
 
 // --- User Profile ---
 // Hàm gọi API để lấy thông tin cá nhân của người dùng đang đăng nhập
 export const fetchUserProfile = () => API.get('/users/profile');
-export const fetchCategories = () => API.get('/categories');
 
 // Hàm gọi API để lấy lịch sử đơn hàng của người dùng đang đăng nhập
 export const fetchMyOrders = () => API.get('/users/my-orders');

@@ -2,18 +2,22 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, updateOrderStatus } from '../services/api';
-import SimulatedQRModal from '../components/SimulatedQRModal';
+// CHÚ THÍCH SỬA ĐỔI: Chỉ cần import `createOrder`, không cần các hàm khác nữa.
+import { createOrder } from '../services/api';
 import { FaTrash } from "react-icons/fa";
 
+
 const CartPage = () => {
+    // PHẦN NÀY GIỮ NGUYÊN
     const { cartItems, cartTotal, updateQuantity, removeFromCart, clearCart } = useCart();
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState('');
-    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
-    const handleProceedToCheckout = (e) => {
+    // CHÚ THÍCH SỬA ĐỔI: Đã xóa state `isQrModalOpen` vì không còn sử dụng Modal.
+    
+    // CHÚ THÍCH SỬA ĐỔI: Hàm này được viết lại hoàn toàn để tạo đơn hàng và chuyển hướng.
+    const handleProceedToCheckout = async (e) => {
         e.preventDefault();
         setError('');
         if (!isAuthenticated) {
@@ -21,38 +25,31 @@ const CartPage = () => {
             navigate('/login', { state: { from: '/cart' } });
             return;
         }
-        setIsQrModalOpen(true);
-    };
 
-    const handlePaymentComplete = async () => {
         try {
-            // --- SỬA LỖI TẠI ĐÂY ---
-            // Thêm một địa chỉ mặc định để đáp ứng yêu cầu của backend
             const orderData = {
                 cartItems: cartItems,
-                shippingAddress: 'Tại quầy', // Gửi giá trị mặc định
+                shippingAddress: 'Tại quầy', // Giữ lại địa chỉ mặc định
             };
-
-            const response = await createOrder(orderData);
-            // --- KẾT THÚC SỬA LỖI ---
             
+            // Bước 1: Tạo đơn hàng và lấy về ID
+            const response = await createOrder(orderData);
             const newOrder = response.data;
-            if (newOrder && newOrder.orderId) {
-                await updateOrderStatus(newOrder.orderId, 'processing');
-            }
-            setIsQrModalOpen(false);
-            alert('Đặt hàng và thanh toán thành công!');
-            clearCart();
-            navigate('/profile');
 
+            if (newOrder && newOrder.orderId) {
+                // Bước 2: Chuyển hướng đến trang thanh toán mới với ID đơn hàng
+                navigate(`/payment/${newOrder.orderId}`);
+            } else {
+                throw new Error('Không nhận được ID đơn hàng sau khi tạo.');
+            }
         } catch (err) {
-            const errorMessage = err.response?.data?.message || 'Đã có lỗi xảy ra khi đặt hàng.';
+            const errorMessage = err.response?.data?.message || 'Đã có lỗi xảy ra khi tạo đơn hàng.';
             setError(errorMessage);
-            // Thêm "Lỗi từ server:" để dễ nhận biết hơn
-            alert(`Đặt hàng thất bại: Lỗi từ server: ${errorMessage}`);
-            setIsQrModalOpen(false);
+            alert(`Lỗi: ${errorMessage}`);
         }
     };
+
+    // CHÚ THÍCH SỬA ĐỔI: Xóa hoàn toàn hàm `handlePaymentComplete` vì logic của nó đã được chuyển sang PaymentPage.jsx.
 
     const formatVND = (n) => {
         return n.toLocaleString("vi-VN") + "₫";
@@ -80,8 +77,7 @@ const CartPage = () => {
                     {/* Cột trái: Danh sách sản phẩm */}
                     <div className="flex-1 bg-white rounded-xl shadow-sm p-3 sm:p-6 border border-gray-200">
                         <div className="overflow-x-auto">
-                            {/* Giao diện Desktop */}
-                            <table className="min-w-[600px] w-full text-sm hidden md:table">
+                             <table className="min-w-[600px] w-full text-sm hidden md:table">
                                 <thead>
                                     <tr className="text-left text-gray-500 border-b border-gray-200">
                                         <th className="py-3 font-medium">Sản phẩm</th>
@@ -114,7 +110,6 @@ const CartPage = () => {
                                     ))}
                                 </tbody>
                             </table>
-                            {/* Giao diện Mobile */}
                             <div className="md:hidden space-y-4">
                                 {cartItems.map(item => (
                                     <div key={item.id} className="border-b border-gray-200 pb-4 last:border-b-0">
@@ -140,7 +135,7 @@ const CartPage = () => {
                         </div>
                     </div>
 
-                    {/* Cột phải: Tóm tắt đơn hàng */}
+                    {/* Cột phải: Đơn hàng của bạn */}
                     <div className="w-full lg:w-[350px] flex-shrink-0">
                         <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 sticky top-8 border border-gray-200">
                             <h2 className="font-bold text-gray-800 mb-4 text-lg">Đơn hàng của bạn</h2>
@@ -158,19 +153,12 @@ const CartPage = () => {
                             </div>
                             {error && <p className="text-sm text-red-600 my-2 text-center">{error}</p>}
                             <button type="submit" className="w-full px-6 py-3 rounded-lg bg-[#A25F4B] text-white font-semibold shadow-sm hover:bg-[#8B4A3A] transition text-base">
-                                Xác Nhận Đặt Hàng
+                                Tiến hành Đặt hàng
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <SimulatedQRModal
-                isOpen={isQrModalOpen}
-                onClose={() => setIsQrModalOpen(false)}
-                onComplete={handlePaymentComplete}
-                totalAmount={cartTotal}
-            />
         </form>
     );
 };

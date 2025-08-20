@@ -1,5 +1,9 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+// ### DÒNG CODE ĐƯỢC THÊM VÀO THEO HƯỚNG DẪN ###
+import ScrollToTop from './components/ScrollToTop'; // Giả sử file nằm trong src/components/
+// ##################################################################
+
 
 // Import các Layout
 import MainLayout from './components/MainLayout';
@@ -21,12 +25,12 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
+import PaymentPage from './pages/PaymentPage';
 
 // Import các trang Admin
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProductManagementPage from './pages/admin/ProductManagementPage';
-// <-- CHÚ THÍCH: Import 3 trang placeholder vừa tạo -->
 import OrderManagementPage from './pages/admin/OrderManagementPage';
 import CategoryManagementPage from './pages/admin/CategoryManagementPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
@@ -34,42 +38,52 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 
 function App() {
   return (
-    <Routes>
-      {/* --- ROUTE ĐĂNG NHẬP ADMIN (Nằm riêng, không dùng layout nào) --- */}
-      <Route path="/admin/login" element={<AdminLoginPage />} />
+    <> {/* <-- THÊM Fragment để bọc ScrollToTop và Routes --> */}
+      <ScrollToTop /> {/* <-- THÊM component ScrollToTop ở đây --> */}
+      <Routes>
+        {/* --- ROUTE ĐĂNG NHẬP ADMIN (Nằm riêng, không dùng layout nào) --- */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
 
-      {/* --- CÁC ROUTE CỦA ADMIN (Sử dụng AdminLayout) --- */}
-      <Route 
-        path="/admin" 
-        element={ <AdminRoute> <AdminLayout /> </AdminRoute> }
-      >
-        <Route index element={<Navigate to="dashboard" replace />} /> 
-        <Route path="dashboard" element={<AdminDashboardPage />} />
-        <Route path="products" element={<ProductManagementPage />} />
+        {/* --- CÁC ROUTE CỦA ADMIN (Sử dụng AdminLayout) --- */}
+        <Route 
+          path="/admin" 
+          element={ <AdminRoute> <AdminLayout /> </AdminRoute> }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} /> 
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          <Route path="products" element={<ProductManagementPage />} />
+          <Route path="orders" element={<OrderManagementPage />} />
+          <Route path="categories" element={<CategoryManagementPage />} />
+          <Route path="users" element={<UserManagementPage />} />
+        </Route>
+
+        {/* --- CÁC ROUTE CỦA USER (Sử dụng MainLayout) --- */}
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="products" element={<ProductListPage />} />
+          <Route path="products/:id" element={<ProductDetailPage />} />
+          <Route path="category/:categoryId" element={<ProductsByCategoryPage />} />
+          <Route path="collections" element={<CollectionPage />} />
+          <Route path="news" element={<NewsPage />} />
+          <Route path="contact" element={<ContactPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="profile" element={ <ProtectedRoute> <ProfilePage /> </ProtectedRoute> } />
+
+          {/* <-- CHÚ THÍCH: Thêm Route cho trang thanh toán mới. Nó cần được bảo vệ để chỉ người dùng đã đăng nhập mới truy cập được. --> */}
+          <Route 
+            path="payment/:orderId" 
+            element={ 
+              <ProtectedRoute> 
+                <PaymentPage /> 
+              </ProtectedRoute> 
+            } 
+          />
+        </Route>
         
-        {/* <-- CHÚ THÍCH: Thêm các route cho các trang quản lý mới ở đây --> */}
-        <Route path="orders" element={<OrderManagementPage />} />
-        <Route path="categories" element={<CategoryManagementPage />} />
-        <Route path="users" element={<UserManagementPage />} />
-
-      </Route>
-
-      {/* --- CÁC ROUTE CỦA USER (Sử dụng MainLayout) --- */}
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="products" element={<ProductListPage />} />
-        <Route path="products/:id" element={<ProductDetailPage />} />
-        <Route path="category/:categoryId" element={<ProductsByCategoryPage />} />
-        <Route path="collections" element={<CollectionPage />} />
-        <Route path="news" element={<NewsPage />} />
-        <Route path="contact" element={<ContactPage />} />
-        <Route path="cart" element={<CartPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
-        <Route path="profile" element={ <ProtectedRoute> <ProfilePage /> </ProtectedRoute> } />
-      </Route>
-      
-    </Routes>
+      </Routes>
+    </>
   );
 }
 
