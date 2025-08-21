@@ -88,7 +88,7 @@ CREATE TABLE OrderItems (
 ) ENGINE=InnoDB;
 
 -- BƯỚC 1: THÊM DỮ LIỆU CHO BẢNG `Users`
--- Tạo 1 tài khoản Admin và 1 tài khoản khách hàng.
+-- Tạo 1 tài khoản Admin và 9 tài khoản khách hàng.
 -- Mật khẩu đã được mã hóa bằng bcrypt, tương ứng với 'admin123' và 'user123'.
 INSERT INTO `Users` (`fullName`, `email`, `password`, `phone`, `address`, `role`) VALUES
 -- 1. TÀI KHOẢN ADMIN
@@ -103,7 +103,7 @@ INSERT INTO `Users` (`fullName`, `email`, `password`, `phone`, `address`, `role`
 ('Bùi Thị Hạnh', 'bui.hanh@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0989012345', '888 Hùng Vương, Quận 6, TP.HCM', 'customer'),
 ('Phan Văn Kiên', 'phan.kien@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0901234567', '999 Quang Trung, Quận Gò Vấp, TP.HCM', 'customer');
 -- BƯỚC 2: THÊM DỮ LIỆU CHO BẢNG `Categories`
--- Tạo ra 5 danh mục chính cho cửa hàng nội thất.
+-- Tạo ra 4 danh mục chính cho cửa hàng nội thất.
 INSERT INTO `Categories` (`id`, `name`, `description`, `imageUrl`) VALUES
 (1, 'Bàn', 'Các loại bàn ăn, bàn làm việc, bàn cà phê với thiết kế đa dạng.', 'https://placehold.co/600x400/E2D5C9/403227?text=Bàn'),
 (2, 'Ghế', 'Ghế ăn, ghế văn phòng, ghế thư giãn, ghế bar tiện nghi và phong cách.', 'https://placehold.co/600x400/E2D5C9/403227?text=Ghế'),

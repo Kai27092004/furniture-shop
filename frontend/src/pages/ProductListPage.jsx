@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, Grid3X3, List, Filter } from 'lucide-react';
 import { fetchProducts, fetchCategories } from '../services/api'; // Thêm fetchCategories
 import ProductCard from '../components/ProductCard';
-// Giả sử bạn có component ProductCarousel, nếu chưa có, hãy tạo nó hoặc tạm thời xóa dòng này
-// import ProductCarousel from '../components/ProductCarousel';
+import ProductCarousel from '../components/ProductCarousel'; // Import ProductCarousel
 
 const ProductListPage = () => {
     // --- State gốc từ ProductListPage ---
@@ -113,6 +112,12 @@ const ProductListPage = () => {
         setFilters({ category: '', priceRange: '' });
         setSortBy('latest');
     };
+    
+    const navigateTo = (page, id) => {
+        // This is a placeholder function. In a real application, you would use
+        // a routing library like react-router-dom to navigate to the correct page.
+        console.log(`Navigating to ${page} with id ${id}`);
+    };
 
     const hasMoreProducts = displayedProducts.length < filteredProducts.length;
 
@@ -130,7 +135,7 @@ const ProductListPage = () => {
             <div className="bg-white border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <nav className="text-sm">
-                        <span className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
+                        <span className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer" onClick={() => navigateTo('home')}>
                             Trang chủ
                         </span>
                         <span className="mx-2 text-gray-400">/</span>
@@ -140,6 +145,10 @@ const ProductListPage = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Product Carousel */}
+                <div className="mb-8">
+                    <ProductCarousel products={products} navigateTo={navigateTo} />
+                </div>
                 {/* Thanh Filter và Sắp xếp */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

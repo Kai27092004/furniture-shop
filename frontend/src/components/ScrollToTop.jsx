@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronUp } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.pageYOffset > 300) {
+      const scrollTop = window.pageYOffset;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = (scrollTop / docHeight) * 100;
+      
+      setScrollProgress(scrollPercent);
+      
+      if (scrollTop > 400) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
@@ -27,13 +34,43 @@ const ScrollToTop = () => {
   return (
     <>
       {isVisible && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 bg-black text-white p-3 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-300 z-50 hover:scale-110"
-          title="Scroll to top"
-        >
-          <ChevronUp className="h-6 w-6" />
-        </button>
+        <div className="fixed bottom-8 right-8 z-50">
+          {/* Progress Circle */}
+          <div className="relative">
+            <svg className="w-12 h-12 transform -rotate-90">
+              <circle
+                cx="24"
+                cy="24"
+                r="20"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="transparent"
+                className="text-gray-200"
+              />
+              <circle
+                cx="24"
+                cy="24"
+                r="20"
+                stroke="currentColor"
+                strokeWidth="2"
+                fill="transparent"
+                strokeDasharray={`${2 * Math.PI * 20}`}
+                strokeDashoffset={`${2 * Math.PI * 20 * (1 - scrollProgress / 100)}`}
+                className="text-hot-orange transition-all duration-150 ease-out"
+              />
+            </svg>
+            
+            {/* Button */}
+            <button
+              onClick={scrollToTop}
+              className="absolute inset-0 bg-white hover:bg-gray-50 text-gray-700 hover:text-hot-orange rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group border border-gray-200"
+              title="Cuộn lên đầu trang"
+              aria-label="Scroll to top"
+            >
+              <ArrowUp className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

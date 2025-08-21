@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ProductCarousel = ({ products, navigateTo }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const featuredProducts = products.filter(product => product.hot).slice(0, 5);
+  // Chỉ lấy 5 sản phẩm đầu tiên từ danh sách sản phẩm được truyền vào
+  const featuredProducts = products.slice(0, 5);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -25,7 +26,8 @@ const ProductCarousel = ({ products, navigateTo }) => {
     setCurrentSlide(index);
   };
 
-  if (featuredProducts.length === 0) {
+  // Kiểm tra xem có sản phẩm nào để hiển thị không
+  if (!products || products.length === 0) {
     return null;
   }
 
@@ -43,7 +45,7 @@ const ProductCarousel = ({ products, navigateTo }) => {
           >
             <div className="relative w-full h-full">
               <img
-                src={product.images[0] || '/img/placeholder.jpg'}
+                src={product.images && product.images.length > 0 ? product.images[0] : '/img/placeholder.jpg'}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -52,11 +54,13 @@ const ProductCarousel = ({ products, navigateTo }) => {
               {/* Content Overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-white px-4">
-                  <span className="inline-block bg-hot-orange text-white text-xs font-bold px-2 py-1 rounded mb-2">
-                    HOT
-                  </span>
+                  {product.hot && (
+                    <span className="inline-block bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded mb-2">
+                      HOT
+                    </span>
+                  )}
                   <h2 className="text-2xl md:text-4xl font-bold mb-2">{product.name}</h2>
-                  <p className="text-lg md:text-xl mb-4">${product.price.toFixed(2)}</p>
+                  <p className="text-lg md:text-xl mb-4">{product.price.toLocaleString('vi-VN')}đ</p>
                   <button
                     onClick={() => navigateTo('product-detail', product.id)}
                     className="bg-white text-black px-6 py-2 rounded font-semibold hover:bg-gray-100 transition-colors"
