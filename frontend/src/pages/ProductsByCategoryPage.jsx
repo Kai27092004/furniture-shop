@@ -24,14 +24,21 @@ const ProductsByCategoryPage = () => {
         getProducts();
     }, [categoryId]); // Chạy lại mỗi khi categoryId trên URL thay đổi
 
-    if (loading) return <p className="text-center">Đang tải sản phẩm...</p>;
+    if (loading) return <p className="text-center py-10">Đang tải sản phẩm...</p>;
+
+    const categoryName = products.length > 0 ? products[0].category.name : '';
 
     return (
-        <div>
-            {/* Lấy tên danh mục từ sản phẩm đầu tiên để làm tiêu đề */}
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">
-                Danh Mục: {products.length > 0 ? products[0].category.name : ''}
-            </h1>
+        <div className="container mx-auto px-4 py-8">
+            {/* --- PHẦN THAY ĐỔI --- */}
+            <div className="text-center mb-8">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 uppercase tracking-wider">
+                    Danh Mục: {categoryName}
+                </h1>
+                <div className="mt-4 w-24 h-1 bg-gray-800 mx-auto"></div>
+            </div>
+            {/* --- KẾT THÚC PHẦN THAY ĐỔI --- */}
+
             {products.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {products.map(product => (
@@ -39,7 +46,7 @@ const ProductsByCategoryPage = () => {
                     ))}
                 </div>
             ) : (
-                <p>Không có sản phẩm nào trong danh mục này.</p>
+                <p className="text-center text-gray-600">Không có sản phẩm nào trong danh mục này.</p>
             )}
         </div>
     );

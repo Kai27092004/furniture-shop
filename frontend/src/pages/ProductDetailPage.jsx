@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchProductById } from '../services/api';
+import { fetchProductById, BACKEND_URL } from '../services/api'; // <-- CHỈNH SỬA DÒNG NÀY
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Minus, Plus, Heart, Maximize2, Facebook, Twitter, Linkedin } from 'lucide-react';
@@ -54,7 +54,8 @@ const ProductDetailPage = () => {
     
     const handleImageFullscreen = () => {
         if (product && product.imageUrl) {
-             window.open(product.imageUrl, '_blank');
+             // <-- CHỈNH SỬA DÒNG NÀY
+             window.open(`${BACKEND_URL}${product.imageUrl}`, '_blank');
         }
     };
 
@@ -103,24 +104,25 @@ const ProductDetailPage = () => {
                         {/* Left Side - Images */}
                         <div className="space-y-4">
                              <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                                <img
-                                    src={images[selectedImage] || '/img/placeholder.jpg'}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                />
-                                {product.hot && (
-                                    <span className="absolute top-4 left-4 bg-hot-orange text-white text-sm font-bold px-3 py-1 rounded">
-                                        HOT
-                                    </span>
-                                )}
-                                <button
-                                    onClick={handleImageFullscreen}
-                                    className="absolute top-4 right-4 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all"
-                                    title="Fullscreen"
-                                >
-                                    <Maximize2 className="h-5 w-5 text-gray-700" />
-                                </button>
-                            </div>
+                                 <img
+                                     // <-- CHỈNH SỬA DÒNG NÀY
+                                     src={`${BACKEND_URL}${images[selectedImage]}` || '/img/placeholder.jpg'}
+                                     alt={product.name}
+                                     className="w-full h-full object-cover"
+                                 />
+                                 {product.hot && (
+                                     <span className="absolute top-4 left-4 bg-hot-orange text-white text-sm font-bold px-3 py-1 rounded">
+                                         HOT
+                                     </span>
+                                 )}
+                                 <button
+                                     onClick={handleImageFullscreen}
+                                     className="absolute top-4 right-4 bg-white bg-opacity-80 hover:bg-opacity-100 p-2 rounded-full transition-all"
+                                     title="Fullscreen"
+                                 >
+                                     <Maximize2 className="h-5 w-5 text-gray-700" />
+                                 </button>
+                             </div>
                             {images.length > 1 && (
                                 <div className="flex space-x-2 overflow-x-auto">
                                     {images.map((image, index) => (
@@ -134,7 +136,8 @@ const ProductDetailPage = () => {
                                             }`}
                                         >
                                             <img
-                                                src={image || '/img/placeholder.jpg'}
+                                                 // <-- CHỈNH SỬA DÒNG NÀY
+                                                src={`${BACKEND_URL}${image}` || '/img/placeholder.jpg'}
                                                 alt={`${product.name} ${index + 1}`}
                                                 className="w-full h-full object-cover"
                                             />
@@ -154,8 +157,8 @@ const ProductDetailPage = () => {
                                     </span>
                                     {product.hot && (
                                          <span className="bg-hot-orange text-white text-sm font-bold px-2 py-1 rounded">
-                                            HOT
-                                        </span>
+                                             HOT
+                                         </span>
                                     )}
                                 </div>
                             </div>

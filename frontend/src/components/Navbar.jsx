@@ -67,7 +67,6 @@ const Navbar = () => {
                     {/* Logo */}
                     <Link to="/" className="flex-shrink-0" onClick={handleMobileLinkClick}>
                         <div className="group">
-                            {/* THAY ĐỔI: Giảm độ nâng khi hover từ -translate-y-1 xuống -translate-y-0.5 */}
                             <div className="uppercase text-3xl font-bold tracking-wide cursor-pointer px-4 py-2 rounded-xl border-2 border-transparent hover:border-[#A25F4B]/20 hover:bg-white/60 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 ease-out hover:scale-105">
                                 <span className="text-black group-hover:text-[#A25F4B] transition-colors duration-300">SHOP</span>
                                 <span className="text-[#A25F4B] transition-colors duration-300">NK</span>
@@ -89,11 +88,9 @@ const Navbar = () => {
 
                                     {item.hasDropdown && (
                                         <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+                                            {/* --- PHẦN THAY ĐỔI --- */}
                                             <div className="py-1">
-                                                <Link to="/products" className="block px-4 py-2 text-base text-gray-700 hover:bg-gray-100 hover:text-[#A25F4B] transition-colors duration-200">
-                                                    Tất cả sản phẩm
-                                                </Link>
-                                                <div className="border-t border-gray-100 my-1"></div>
+                                                {/* Đã xóa "Tất cả sản phẩm" và vạch kẻ */}
                                                 {categories.map(category => (
                                                     <Link
                                                         key={category.id}
@@ -104,6 +101,7 @@ const Navbar = () => {
                                                     </Link>
                                                 ))}
                                             </div>
+                                            {/* --- KẾT THÚC PHẦN THAY ĐỔI --- */}
                                         </div>
                                     )}
                                 </div>
@@ -170,16 +168,16 @@ const Navbar = () => {
                                         </div>
                                     </button>
                                     {isMobileProductDropdownOpen && (
+                                        // --- PHẦN THAY ĐỔI ---
                                         <div className="ml-4 mt-1 space-y-1">
-                                            <Link to="/products" onClick={handleMobileLinkClick} className="block px-3 py-2 text-base text-gray-600 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 rounded">
-                                                Tất cả sản phẩm
-                                            </Link>
+                                            {/* Đã xóa "Tất cả sản phẩm" */}
                                             {categories.map(category => (
                                                 <Link key={category.id} to={`/category/${category.id}`} onClick={handleMobileLinkClick} className="block px-3 py-2 text-base text-gray-600 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 rounded">
                                                     {category.name}
                                                 </Link>
                                             ))}
                                         </div>
+                                        // --- KẾT THÚC PHẦN THAY ĐỔI ---
                                     )}
                                 </div>
                             )}

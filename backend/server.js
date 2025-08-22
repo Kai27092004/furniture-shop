@@ -12,6 +12,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Phục vụ các tệp tĩnh từ thư mục 'public'
+app.use(express.static('public'));
+
 // Đồng bộ database
 // db.sequelize.sync({ force: true }) // Dùng { force: true } để xóa và tạo lại bảng, chỉ dùng trong dev
 db.sequelize.sync()

@@ -12,13 +12,16 @@ exports.getAllProducts = async (req, res) => {
         whereCondition.categoryId = categoryId;
     }
     try {
+        // --- PHẦN THAY ĐỔI ---
         const products = await Product.findAll({
+            where: whereCondition, // Thêm điều kiện lọc vào đây
             include: [{
                 model: Category,
                 as: 'category',
                 attributes: ['id', 'name'] // Chỉ lấy id và name của category
             }]
         });
+        // --- KẾT THÚC PHẦN THAY ĐỔI ---
         res.status(200).send(products);
     } catch (error) {
         res.status(500).send({ message: error.message });

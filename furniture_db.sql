@@ -30,7 +30,6 @@ CREATE TABLE Categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT NULL,
-    imageUrl VARCHAR(255) NULL, -- URL hình ảnh đại diện cho danh mục
     createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -102,25 +101,31 @@ INSERT INTO `Users` (`fullName`, `email`, `password`, `phone`, `address`, `role`
 ('Đỗ Minh Hải', 'do.hai@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0978901234', '777 Lý Thường Kiệt, Quận Tân Bình, TP.HCM', 'customer'),
 ('Bùi Thị Hạnh', 'bui.hanh@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0989012345', '888 Hùng Vương, Quận 6, TP.HCM', 'customer'),
 ('Phan Văn Kiên', 'phan.kien@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0901234567', '999 Quang Trung, Quận Gò Vấp, TP.HCM', 'customer');
+
 -- BƯỚC 2: THÊM DỮ LIỆU CHO BẢNG `Categories`
 -- Tạo ra 4 danh mục chính cho cửa hàng nội thất.
-INSERT INTO `Categories` (`id`, `name`, `description`, `imageUrl`) VALUES
-(1, 'Bàn', 'Các loại bàn ăn, bàn làm việc, bàn cà phê với thiết kế đa dạng.', 'https://placehold.co/600x400/E2D5C9/403227?text=Bàn'),
-(2, 'Ghế', 'Ghế ăn, ghế văn phòng, ghế thư giãn, ghế bar tiện nghi và phong cách.', 'https://placehold.co/600x400/E2D5C9/403227?text=Ghế'),
-(3, 'Tủ và Kệ', 'Giải pháp lưu trữ thông minh với tủ quần áo, kệ sách, kệ trang trí.', 'https://placehold.co/600x400/E2D5C9/403227?text=Tủ+Kệ'),
-(4, 'Giường', 'Những mẫu giường ngủ êm ái, mang lại giấc ngủ ngon và tô điểm cho phòng ngủ.', 'https://placehold.co/600x400/E2D5C9/403227?text=Giường'),
-(5, 'Sofa', 'Sofa băng, sofa góc cho phòng khách thêm sang trọng và ấm cúng.', 'https://placehold.co/600x400/E2D5C9/403227?text=Sofa');
-
+INSERT INTO `Categories` (`id`, `name`, `description`) VALUES
+(1, 'Giường', 'Những mẫu giường ngủ êm ái, mang lại giấc ngủ ngon và tô điểm cho phòng ngủ.'),
+(2, 'Tủ quần áo', 'Giải pháp lưu trữ thông minh với tủ quần áo, kệ sách, kệ trang trí.'),
+(3, 'Bàn trang điểm', 'Các loại bàn trang điểm với thiết kế đa dạng.'),
+(4, 'Sofa', 'Sofa băng, sofa góc cho phòng khách thêm sang trọng và ấm cúng.');
 
 -- BƯỚC 3: THÊM DỮ LIỆU CHO BẢNG `Products`
--- Tạo ra các sản phẩm mẫu thuộc các danh mục đã có.
--- `categoryId` sẽ tương ứng với `id` của các danh mục ở trên.
+-- Tạo ra 16 sản phẩm, chia đều cho 4 danh mục.
 INSERT INTO `Products` (`name`, `description`, `price`, `stockQuantity`, `imageUrl`, `sku`, `dimensions`, `material`, `categoryId`) VALUES
-('Bàn Ăn Gỗ Sồi 4 Chỗ Hiện Đại', 'Bàn ăn làm từ gỗ sồi tự nhiên, thiết kế tối giản theo phong cách Bắc Âu. Bề mặt được xử lý chống thấm, chống trầy xước, dễ dàng vệ sinh. Chân bàn chắc chắn, chịu lực tốt.', 4500000.00, 15, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Bàn+Sồi', 'BAN-SOI-001', '120cm x 75cm x 75cm', 'Gỗ sồi tự nhiên', 1),
-('Ghế Ăn Bọc Nệm Da PU Chân Sắt', 'Ghế ăn có thiết kế thanh lịch, lưng ghế bo cong tạo cảm giác thoải mái. Nệm bọc da PU cao cấp, không bong tróc. Khung chân sắt sơn tĩnh điện, bền bỉ và vững chãi.', 750000.00, 40, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Ghế+Da', 'GHE-DA-001', '45cm x 50cm x 85cm', 'Da PU, Sắt sơn tĩnh điện', 2),
-('Kệ Sách 5 Tầng Gỗ Công Nghiệp', 'Kệ sách đứng với 5 tầng lưu trữ rộng rãi, phù hợp cho phòng khách hoặc phòng làm việc. Chất liệu gỗ công nghiệp MDF phủ melamine chống ẩm, màu sắc vân gỗ tự nhiên.', 1200000.00, 25, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Kệ+Sách', 'KE-MDF-001', '80cm x 30cm x 180cm', 'Gỗ MDF phủ Melamine', 3),
-('Sofa Băng 3 Chỗ Vải Nỉ Cao Cấp', 'Mẫu sofa băng hiện đại, bọc vải nỉ mềm mại, thoáng khí. Khung gỗ dầu đã qua xử lý chống mối mọt. Nệm mút D40 êm ái, có độ đàn hồi cao, không bị xẹp lún.', 7800000.00, 10, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Sofa+Nỉ', 'SOFA-NI-001', '220cm x 85cm x 80cm', 'Vải nỉ, Gỗ dầu, Mút D40', 5),
-('Giường Ngủ Gỗ Tràm Tự Nhiên 1m6', 'Giường ngủ đôi làm từ gỗ tràm bền chắc, vân gỗ đẹp. Thiết kế đầu giường đơn giản, tinh tế. Sản phẩm đã được xử lý để chống cong vênh, mối mọt.', 5900000.00, 8, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Giường+Tràm', 'GIUONG-TRAM-001', '160cm x 200cm', 'Gỗ tràm', 4),
-('Bàn Trà Tròn Mặt Kính Cường Lực', 'Bàn trà (bàn sofa) mặt kính cường lực dày 10mm, chống va đập và an toàn. Chân bàn bằng gỗ sồi tạo hình 3 chân độc đáo, mang lại vẻ đẹp hiện đại cho phòng khách.', 1850000.00, 20, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Bàn+Trà', 'BAN-TRA-001', 'Đường kính 80cm, Cao 45cm', 'Kính cường lực, Gỗ sồi', 1),
-('Tủ Quần Áo 3 Cánh Cửa Lùa', 'Tủ quần áo tiết kiệm không gian với thiết kế cửa lùa tiện lợi. Bên trong được chia thành các khoang treo và ngăn xếp đồ khoa học. Chất liệu gỗ công nghiệp cao cấp.', 6500000.00, 12, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Tủ+Áo', 'TU-AO-001', '160cm x 60cm x 200cm', 'Gỗ MDF lõi xanh chống ẩm', 3),
-('Ghế Thư Giãn Papasan Mây Tự Nhiên', 'Ghế thư giãn Papasan hình tròn, làm từ song mây tự nhiên 100%, đi kèm nệm bông gòn dày dặn, êm ái. Thích hợp để đọc sách, nghe nhạc trong góc phòng hoặc ban công.', 2500000.00, 18, 'https://placehold.co/600x400/A89F91/FFFFFF?text=Ghế+Mây', 'GHE-MAY-001', 'Đường kính 100cm', 'Mây tự nhiên, Vải canvas, Bông gòn', 2);
+('Giường Diệp Mộc', 'Giường Diệp Mộc mang lại thiết kế dịu mắt với màu xanh nhẹ nhàng, tạo nên không gian êm ái và dễ chịu cho phòng ngủ của bạn.', 5900000.00, 8, '/upload/giuong-diep-moc.jpg', 'GIUONG-TRAM-001', '180cm x 200cm', 'Gỗ MDF', 1),
+('Giường Vải Nhung', 'Giường Vải Nhung được thiết kế để mang đến sự kết hợp hoàn hảo giữa phong cách hiện đại tối giản và sự thoải mái tối đa.', 7200000.00, 10, '/upload/giuong-nhung.jpg', 'GIUONG-NEM-001', '120cm x 220cm', 'Vải nhung, khung gỗ', 1),
+('Giường Da', 'Giường da được thiết kế để mang đến sự kết hợp hoàn hảo giữa chất liệu da PU cao cấp và phong cách hiện đại, mang lại sự thoải mái và đẳng cấp cho không gian sống của bạn.', 8500000.00, 5, '/upload/giuong-da.jpg', 'GIUONG-TANG-001', '180cm x 200cm', 'Gỗ MDF', 1),
+('Giường Gỗ MDF', 'Thiết kế giường hộp tối giản không chỉ tạo ra vẻ đẹp thanh lịch mà còn giải quyết vấn đề của việc rơi đồ cá nhân dưới giường, nhờ việc loại bỏ chân giường.', 4800000.00, 12, '/upload/giuong-mdf.jpg', 'GIUONG-GAP-001', '180cm x 200cm', 'Gỗ MDF', 1),
+('Tủ Áo Diệp Mộc', 'Khung tủ được thiết kế với nhiều ngăn đa dạng, bao gồm hộc tủ, kệ, sào treo và hộc tủ có khóa, cung cấp giải pháp lưu trữ tối ưu cho quần áo và phụ kiện.', 1200000.00, 25, '/upload/tu-ao-diep-moc.jpg', 'KE-MDF-001', '160cm x 55cm x 200cm', 'Gỗ MDF phủ Melamine', 2),
+('Tủ Áo Diệp Nhiên', 'Kích thước rộng rãi, cung cấp không gian lưu trữ rộng lớn, phù hợp với nhiều nhu cầu sử dụng. Màu sắc dịu nhẹ tạo nên sự hài hòa trong chính căn phòng của bạn.', 6500000.00, 12, '/upload/tu-ao-diep-nhien.jpg', 'TU-AO-001', '160cm x 55cm x 200cm', 'Gỗ MDF lõi xanh chống ẩm', 2),
+('Tủ Áo Cửa Lùa', 'Kích thước rộng rãi, cung cấp không gian lưu trữ rộng lớn, phù hợp với nhiều nhu cầu sử dụng.', 2100000.00, 20, '/upload/tu-ao-mdf.jpg', 'TU-GIAY-001', '140cm x 55cm x 240cm', 'Gỗ công nghiệp', 2),
+('Tủ Áo Gỗ MDF Phủ Sơn', 'Kích thước rộng rãi, cung cấp không gian lưu trữ rộng lớn, phù hợp với nhiều nhu cầu sử dụng.', 3800000.00, 15, '/upload/tu-ao-son.jpg', 'KE-TIVI-001', '160cm x 55cm x 200cm', 'Gỗ MDF', 2),
+('Bàn Trang Điểm Q1', 'Được làm từ vật liệu MDF chất lượng cao, với bề mặt phủ lớp melamine, chống trầy, ước, chống thấm nước, giúp dễ dàng vệ sinh và đảm bảo độ bền trong thời gian sử dụng.', 4500000.00, 15, '/upload/ban-trang-diem-q1.jpg', 'BAN-SOI-001', '100cm x 40cm x 160cm', 'Gỗ sồi tự nhiên', 3),
+('Bàn Trang Điểm Q2', 'Được làm từ vật liệu MDF chất lượng cao, với bề mặt phủ lớp melamine, chống trầy, ước, chống thấm nước, giúp dễ dàng vệ sinh và đảm bảo độ bền trong thời gian sử dụng.', 750000.00, 40, '/upload/ban-trang-diem-q2.jpg', 'GHE-DA-001', '100cm x 40cm x 160cm', 'Da PU, Sắt sơn tĩnh điện', 3),
+('Bàn Trang Điểm Q3', 'Được làm từ vật liệu MDF chất lượng cao, với bề mặt phủ lớp melamine, chống trầy, ước, chống thấm nước, giúp dễ dàng vệ sinh và đảm bảo độ bền trong thời gian sử dụng.', 3200000.00, 18, '/upload/ban-trang-diem-q3.jpg', 'BTD-LED-001', '120cm x 40cm x 160cm', 'Gỗ công nghiệp, Kính', 3),
+('Bàn Trang Điểm Q4', 'Được làm từ vật liệu MDF chất lượng cao, với bề mặt phủ lớp melamine, chống trầy, ước, chống thấm nước, giúp dễ dàng vệ sinh và đảm bảo độ bền trong thời gian sử dụng.', 2800000.00, 15, '/upload/ban-trang-diem-q4.jpg', 'BLV-L-001', '120cm x 40cm x 160cm', 'Gỗ công nghiệp, Chân sắt', 3),
+('Sofa Ngọc Ngà', 'Vải thiết kế hiện đại, các đường nét mềm mại và tỉ mỉ, Sofa Ngọc Ngà mang đến sự hài hòa giữa tính thẩm mỹ và sự thoải mái', 7800000.00, 10, '/upload/sofa-ngoc-nga.jpg', 'SOFA-NI-001', '220cm x 85cm x 80cm', 'Vải nỉ, Gỗ dầu, Mút D40', 4),
+('Sofa Kết Nối', 'Vải kiểu dáng mô-đun, sofa có thể được sắp xếp theo nhiều cách khác nhau, phù hợp với mọi không gian sống, từ phong cách rộng rãi đến những căn hộ nhỏ,', 1850000.00, 20, '/upload/sofa-ket-noi.jpg', 'BAN-TRA-001', '240cm x 85cm x 70cm', 'Kính cường lực, Gỗ sồi', 4),
+('Sofa Ôm Dịu', 'Vải thiết kế hiện đại pha chút nét mềm mại, sản phẩm này được tạo ra để trở thành trung tâm của mọi không gian sống.', 2500000.00, 18, '/upload/sofa-om-diu.jpg', 'GHE-MAY-001', '200cm x 60cm x 60cm', 'Mây tự nhiên, Vải canvas, Bông gòn', 4),
+('Sofa Bed', 'Sở hữu thiết kế thời thượng với các đường nét tinh gọn và màu sắc trung tính, dễ dàng kết hợp với nhiều cách nội thất khác nhau.', 12500000.00, 7, '/upload/sofa-bed.jpg', 'SOFA-DA-001', '220cm x 85cm x 80cm', 'Da công nghiệp, Khung gỗ', 4);

@@ -1,8 +1,13 @@
+// File: frontend/src/services/api.js
 import axios from 'axios';
+
+// ### DÒNG CODE ĐƯỢC THÊM VÀO ###
+export const BACKEND_URL = 'http://localhost:8080';
+// ###############################
 
 // Tạo một instance của axios với cấu hình mặc định
 const API = axios.create({
-    baseURL: 'http://localhost:8080/api', // Địa chỉ gốc của backend
+    baseURL: `${BACKEND_URL}/api`, // <-- CHỈNH SỬA DÒNG NÀY
     headers: {
         'Content-Type': 'application/json',
     },
@@ -38,9 +43,7 @@ export const deleteProduct = (id) => API.delete(`/products/${id}`);
 export const fetchProductsByCategory = (categoryId) => API.get(`/products?categoryId=${categoryId}`);
 
 // --- Categories ---
-// ### DÒNG CODE ĐƯỢC THÊM VÀO THEO HƯỚNG DẪN ###
 export const fetchCategories = () => API.get('/categories');
-// ##################################################################
 
 
 // --- User Profile ---
