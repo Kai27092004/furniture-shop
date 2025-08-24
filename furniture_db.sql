@@ -129,3 +129,81 @@ INSERT INTO `Products` (`name`, `description`, `price`, `stockQuantity`, `imageU
 ('Sofa Kết Nối', 'Vải kiểu dáng mô-đun, sofa có thể được sắp xếp theo nhiều cách khác nhau, phù hợp với mọi không gian sống, từ phong cách rộng rãi đến những căn hộ nhỏ,', 1850000.00, 20, '/upload/sofa-ket-noi.jpg', 'BAN-TRA-001', '240cm x 85cm x 70cm', 'Kính cường lực, Gỗ sồi', 4),
 ('Sofa Ôm Dịu', 'Vải thiết kế hiện đại pha chút nét mềm mại, sản phẩm này được tạo ra để trở thành trung tâm của mọi không gian sống.', 2500000.00, 18, '/upload/sofa-om-diu.jpg', 'GHE-MAY-001', '200cm x 60cm x 60cm', 'Mây tự nhiên, Vải canvas, Bông gòn', 4),
 ('Sofa Bed', 'Sở hữu thiết kế thời thượng với các đường nét tinh gọn và màu sắc trung tính, dễ dàng kết hợp với nhiều cách nội thất khác nhau.', 12500000.00, 7, '/upload/sofa-bed.jpg', 'SOFA-DA-001', '220cm x 85cm x 80cm', 'Da công nghiệp, Khung gỗ', 4);
+-- BƯỚC 4: TẠO PROCEDURE ĐỂ THÊM DỮ LIỆU ĐƠN HÀNG TỰ ĐỘNG
+DELIMITER $$
+
+CREATE PROCEDURE GenerateRandomOrders()
+BEGIN
+    DECLARE i INT DEFAULT 0;
+    DECLARE j INT;
+    DECLARE randomUserId INT;
+    DECLARE randomProductId INT;
+    DECLARE randomQuantity INT;
+    DECLARE productPrice DECIMAL(10, 2);
+    DECLARE totalOrderAmount DECIMAL(10, 2);
+    DECLARE newOrderId INT;
+    DECLARE itemsPerOrder INT;
+    DECLARE userAddress TEXT;
+    DECLARE orderStatus ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled');
+    DECLARE randomDate DATETIME;
+
+    -- Lặp 100 lần để tạo 100 đơn hàng
+    WHILE i < 100 DO
+        SET i = i + 1;
+        SET totalOrderAmount = 0;
+        
+        -- 1. Chọn ngẫu nhiên một userId (chỉ chọn khách hàng, id từ 2 đến 10)
+        SET randomUserId = FLOOR(2 + (RAND() * 9));
+        
+        -- Lấy địa chỉ của user để làm địa chỉ giao hàng
+        SELECT address INTO userAddress FROM Users WHERE id = randomUserId;
+        
+        -- 2. Tạo một đơn hàng mới trong bảng `Orders` để lấy `orderId`
+        -- Chọn ngẫu nhiên một trạng thái đơn hàng
+        SET orderStatus = ELT(FLOOR(1 + RAND() * 5), 'pending', 'processing', 'shipped', 'delivered', 'cancelled');
+        
+        -- Tạo một ngày đặt hàng ngẫu nhiên trong vòng 1 năm trở lại đây
+        SET randomDate = NOW() - INTERVAL FLOOR(RAND() * 365) DAY;
+
+        INSERT INTO Orders (userId, totalAmount, status, shippingAddress, customerNotes, createdAt)
+        VALUES (randomUserId, 0, orderStatus, userAddress, CONCAT('Ghi chú tự động cho đơn hàng ', i), randomDate);
+        
+        -- Lấy ID của đơn hàng vừa tạo
+        SET newOrderId = LAST_INSERT_ID();
+        
+        -- 3. Mỗi đơn hàng sẽ có từ 1 đến 5 sản phẩm khác nhau
+        SET itemsPerOrder = FLOOR(1 + (RAND() * 5));
+        SET j = 0;
+        
+        WHILE j < itemsPerOrder DO
+            SET j = j + 1;
+            
+            -- Chọn ngẫu nhiên một sản phẩm (id từ 1 đến 16)
+            SET randomProductId = FLOOR(1 + (RAND() * 16));
+            
+            -- Lấy giá sản phẩm
+            SELECT price INTO productPrice FROM Products WHERE id = randomProductId;
+            
+            -- Số lượng mỗi sản phẩm từ 1 đến 3
+            SET randomQuantity = FLOOR(1 + (RAND() * 3));
+            
+            -- Thêm sản phẩm vào bảng `OrderItems`
+            INSERT INTO OrderItems (orderId, productId, quantity, price)
+            VALUES (newOrderId, randomProductId, randomQuantity, productPrice);
+            
+            -- Cập nhật tổng tiền của đơn hàng
+            SET totalOrderAmount = totalOrderAmount + (productPrice * randomQuantity);
+        END WHILE;
+        
+        -- 4. Cập nhật lại tổng tiền cho đơn hàng trong bảng `Orders`
+        UPDATE Orders SET totalAmount = totalOrderAmount WHERE id = newOrderId;
+        
+    END WHILE;
+END$$
+
+DELIMITER ;
+
+-- BƯỚC 5: GỌI PROCEDURE ĐỂ TẠO DỮ LIỆU
+CALL GenerateRandomOrders();
+-- Xóa procedure sau khi đã dùng xong
+-- DROP PROCEDURE CreateRandomOrders;
