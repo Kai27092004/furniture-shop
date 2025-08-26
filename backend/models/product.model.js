@@ -14,8 +14,21 @@ module.exports = (sequelize, DataTypes) => {
         categoryId: { type: DataTypes.INTEGER, allowNull: true }
     }, {
         tableName: 'Products',
-        timestamps: false
+        timestamps: true
     });
+
+    Product.associate = (models) => {
+        // Một Product thuộc về một Category
+        Product.belongsTo(models.Category, {
+            foreignKey: 'categoryId',
+            as: 'category'
+        });
+        // Một Product có thể nằm trong nhiều OrderItem
+        Product.hasMany(models.OrderItem, {
+            foreignKey: 'productId',
+            as: 'orderItems'
+        });
+    };
 
     return Product;
 };

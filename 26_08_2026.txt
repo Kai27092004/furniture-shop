@@ -1,0 +1,1 @@
+Nhiệm vụ: đồng bộ backend với furniture_db.sql, định nghĩa mối quan hệ (Associations) giữa các Model, Thêm associate vào các file Model, Phân quyền cập nhật trạng thái đơn hàng cho Admin.

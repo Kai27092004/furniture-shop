@@ -20,7 +20,8 @@ exports.getAllCategories = async (req, res) => {
 exports.createCategory = async (req, res) => {
     try {
         // Lấy thông tin từ body request (gửi lên từ form của Admin)
-        const { name, description, imageUrl } = req.body;
+        // --- PHẦN THAY ĐỔI ---
+        const { name, description } = req.body; // Bỏ imageUrl ra khỏi đây
 
         // Kiểm tra xem tên danh mục đã được cung cấp chưa
         if (!name) {
@@ -30,9 +31,10 @@ exports.createCategory = async (req, res) => {
         // Tạo danh mục mới trong database
         const category = await Category.create({
             name,
-            description,
-            imageUrl
+            description
+            // Bỏ imageUrl ra khỏi đây
         });
+        // --- KẾT THÚC PHẦN THAY ĐỔI ---
 
         res.status(201).send({ message: "Tạo danh mục thành công!", data: category });
     } catch (error) {
@@ -50,8 +52,11 @@ exports.updateCategory = async (req, res) => {
     try {
         const category = await Category.findByPk(id);
         if (category) {
-            // Cập nhật danh mục với dữ liệu mới từ body request
-            await category.update(req.body);
+            // --- PHẦN THAY ĐỔI ---
+            // Chỉ cho phép cập nhật 'name' và 'description' để đảm bảo an toàn
+            const { name, description } = req.body;
+            await category.update({ name, description });
+            // --- KẾT THÚC PHẦN THAY ĐỔI ---
             res.status(200).send({ message: "Cập nhật danh mục thành công.", data: category });
         } else {
             res.status(404).send({ message: `Không tìm thấy danh mục với id=${id}.` });

@@ -1,3 +1,5 @@
+// File: backend/models/order.model.js
+
 module.exports = (sequelize, DataTypes) => {
     const Order = sequelize.define('Order', {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -12,8 +14,21 @@ module.exports = (sequelize, DataTypes) => {
         customerNotes: { type: DataTypes.TEXT, allowNull: true }
     }, {
         tableName: 'Orders',
-        timestamps: true // Bảng này có createdAt và updatedAt
+        timestamps: true
     });
+
+    Order.associate = (models) => {
+        // Một Order thuộc về một User
+        Order.belongsTo(models.User, {
+            foreignKey: 'userId',
+            as: 'user'
+        });
+        // Một Order có nhiều OrderItem
+        Order.hasMany(models.OrderItem, {
+            foreignKey: 'orderId',
+            as: 'items'
+        });
+    };
 
     return Order;
 };

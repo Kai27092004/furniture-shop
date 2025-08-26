@@ -2,11 +2,10 @@
 
 const db = require('../models');
 
-// --- HÀM 1: TẠO ĐƠN HÀNG MỚI (Code của bạn, đã hoạt động tốt) ---
-// Chức năng: Xử lý logic khi người dùng xác nhận đặt hàng từ giỏ hàng.
+// --- HÀM 1: TẠO ĐƠN HÀNG MỚI ---
 exports.createOrder = async (req, res) => {
     const userId = req.userId; // Lấy từ middleware xác thực
-    const { cartItems, shippingAddress } = req.body;
+    const { cartItems, shippingAddress, customerNotes } = req.body;
 
     // Bắt đầu một transaction để đảm bảo toàn vẹn dữ liệu
     const t = await db.sequelize.transaction();
@@ -32,7 +31,8 @@ exports.createOrder = async (req, res) => {
         const order = await db.Order.create({
             userId,
             totalAmount,
-            shippingAddress
+            shippingAddress,
+            customerNotes
         }, { transaction: t });
 
         // BƯỚC 3: TẠO CHI TIẾT ĐƠN HÀNG (ORDER ITEMS) VÀ CẬP NHẬT KHO
@@ -54,7 +54,6 @@ exports.createOrder = async (req, res) => {
         // Nếu mọi thứ thành công, commit transaction
         await t.commit();
         
-        // Trả về thông báo thành công cùng với thông tin cần thiết cho frontend
         res.status(201).send({ 
             message: "Đặt hàng thành công!", 
             orderId: order.id,
@@ -68,82 +67,61 @@ exports.createOrder = async (req, res) => {
     }
 };
 
-// --- HÀM 2: HỦY ĐƠN HÀNG (Code của bạn, đã hoạt động tốt) ---
-// Chức năng: Cho phép người dùng hủy đơn hàng của chính họ khi nó đang ở trạng thái "pending".
+// --- HÀM 2: HỦY ĐƠN HÀNG (USER TỰ HỦY) ---
 exports.cancelOrder = async (req, res) => {
-    // Lấy userId từ token đã xác thực để đảm bảo bảo mật
     const userId = req.userId; 
-    // Lấy orderId từ tham số trên đường dẫn URL (ví dụ: /api/orders/15/cancel)
     const { orderId } = req.params;
-
-    // Bắt đầu một transaction để đảm bảo việc hủy đơn và hoàn kho được thực hiện cùng lúc
     const t = await db.sequelize.transaction();
 
     try {
-        // Tìm đơn hàng cần hủy với các điều kiện an toàn:
-        // 1. ID phải khớp.
-        // 2. Phải thuộc về người dùng đang đăng nhập (ngăn người dùng hủy đơn của người khác).
-        // 3. Trạng thái phải là 'pending' (không thể hủy đơn đã giao hoặc đã hủy).
         const order = await db.Order.findOne({
             where: {
                 id: orderId,
                 userId: userId,
                 status: 'pending'
             },
-            include: [{ model: db.OrderItem, as: 'items' }], // Lấy kèm các sản phẩm trong đơn để hoàn kho
+            include: [{ model: db.OrderItem, as: 'items' }],
             transaction: t
         });
 
-        // Nếu không tìm thấy đơn hàng nào thỏa mãn các điều kiện trên
         if (!order) {
-            await t.rollback(); // Dừng và hủy bỏ transaction
+            await t.rollback();
             return res.status(404).send({ message: "Không tìm thấy đơn hàng hoặc đơn hàng không thể hủy." });
         }
 
-        // Cập nhật trạng thái của đơn hàng thành 'cancelled'
         order.status = 'cancelled';
         await order.save({ transaction: t });
 
-        // Vòng lặp để hoàn trả lại số lượng cho từng sản phẩm trong đơn hàng đã hủy
         for (const item of order.items) {
-            // Sử dụng hàm `increment` của Sequelize để cộng lại số lượng vào 'stockQuantity'
             await db.Product.increment('stockQuantity', {
-                by: item.quantity, // Số lượng cần cộng lại
-                where: { id: item.productId }, // Điều kiện tìm sản phẩm
+                by: item.quantity,
+                where: { id: item.productId },
                 transaction: t
             });
         }
 
-        // Nếu tất cả các bước trên thành công, xác nhận và lưu lại tất cả thay đổi
         await t.commit();
         res.status(200).send({ message: "Hủy đơn hàng thành công." });
 
     } catch (error) {
-        // Nếu có bất kỳ lỗi nào xảy ra trong quá trình trên, hủy bỏ mọi thay đổi
         await t.rollback();
         res.status(500).send({ message: "Lỗi khi hủy đơn hàng: " + error.message });
     }
 };
 
 
-// --- HÀM 3: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (Phần code thêm mới) ---
-// Chức năng: Cập nhật trạng thái của một đơn hàng. Được dùng sau khi thanh toán thành công.
+// --- HÀM 3: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (USER) ---
 exports.updateOrderStatus = async (req, res) => {
-    // Lấy userId từ token để đảm bảo chỉ chủ đơn hàng mới có quyền cập nhật.
     const userId = req.userId;
-    // Lấy orderId từ tham số trên đường dẫn URL (ví dụ: /api/orders/15/status)
     const { orderId } = req.params;
-    // Lấy trạng thái mới từ body của request (ví dụ: { "status": "processing" })
     const { status } = req.body;
 
-    // Kiểm tra xem trạng thái mới có hợp lệ hay không (tùy chọn nhưng nên có)
     const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
     if (!validStatuses.includes(status)) {
         return res.status(400).send({ message: "Trạng thái không hợp lệ." });
     }
 
     try {
-        // Tìm đơn hàng, điều kiện an toàn là phải khớp cả orderId và userId
         const order = await db.Order.findOne({
             where: {
                 id: orderId,
@@ -151,23 +129,21 @@ exports.updateOrderStatus = async (req, res) => {
             }
         });
 
-        // Nếu không tìm thấy đơn hàng của người dùng này
         if (!order) {
             return res.status(404).send({ message: "Không tìm thấy đơn hàng." });
         }
-
-        // Cập nhật trạng thái và lưu lại vào database
+        
         order.status = status;
         await order.save();
 
-        // Trả về thông báo thành công và thông tin đơn hàng đã cập nhật
         res.status(200).send({ message: `Cập nhật trạng thái đơn hàng thành công.`, order });
 
     } catch (error) {
         res.status(500).send({ message: "Lỗi khi cập nhật trạng thái đơn hàng: " + error.message });
     }
 };
-// [ADMIN] Lấy tất cả đơn hàng
+
+// --- HÀM 4: [ADMIN] LẤY TẤT CẢ ĐƠN HÀNG ---
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await db.Order.findAll({
@@ -176,6 +152,63 @@ exports.getAllOrders = async (req, res) => {
         });
         res.status(200).send(orders);
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        res.status(500).send({ message: "Lỗi khi lấy danh sách đơn hàng: " + error.message });
+    }
+};
+
+// --- HÀM 5: [ADMIN] CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG ---
+// Chức năng: Admin cập nhật trạng thái của một đơn hàng bất kỳ.
+exports.adminUpdateOrderStatus = async (req, res) => {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (!status || !validStatuses.includes(status)) {
+        return res.status(400).send({ message: "Trạng thái không hợp lệ." });
+    }
+
+    const t = await db.sequelize.transaction();
+
+    try {
+        const order = await db.Order.findByPk(orderId, {
+            include: [{ model: db.OrderItem, as: 'items' }], // Lấy các sản phẩm đi kèm
+            transaction: t
+        });
+
+        if (!order) {
+            await t.rollback();
+            return res.status(404).send({ message: "Không tìm thấy đơn hàng." });
+        }
+
+        // Logic hoàn kho nếu Admin hủy đơn (chỉ khi trạng thái thay đổi từ khác -> cancelled)
+        if (order.status !== 'cancelled' && status === 'cancelled') {
+            for (const item of order.items) {
+                if (item.productId) { // Kiểm tra sản phẩm còn tồn tại không
+                    await db.Product.increment('stockQuantity', {
+                        by: item.quantity,
+                        where: { id: item.productId },
+                        transaction: t
+                    });
+                }
+            }
+        }
+
+        // Cập nhật trạng thái mới
+        order.status = status;
+        await order.save({ transaction: t });
+
+        // Commit transaction sau khi mọi thứ thành công
+        await t.commit();
+        
+        // Trả về đơn hàng đã được cập nhật
+        const updatedOrder = await db.Order.findByPk(orderId, {
+            include: [{ model: db.User, as: 'user', attributes: ['id', 'fullName', 'email'] }]
+        });
+
+        res.status(200).send({ message: `Cập nhật trạng thái đơn hàng thành công.`, order: updatedOrder });
+
+    } catch (error) {
+        await t.rollback();
+        res.status(500).send({ message: "Lỗi khi cập nhật trạng thái đơn hàng: " + error.message });
     }
 };

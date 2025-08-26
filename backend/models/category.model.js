@@ -7,8 +7,16 @@ module.exports = (sequelize, DataTypes) => {
         description: { type: DataTypes.TEXT, allowNull: true }
     }, {
         tableName: 'Categories',
-        timestamps: false
+        timestamps: true
     });
+
+    Category.associate = (models) => {
+        // Một Category có thể có nhiều Product
+        Category.hasMany(models.Product, {
+            foreignKey: 'categoryId',
+            as: 'products'
+        });
+    };
 
     return Category;
 };

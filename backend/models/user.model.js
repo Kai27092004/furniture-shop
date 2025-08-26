@@ -35,8 +35,16 @@ module.exports = (sequelize, DataTypes) => {
         }
     }, {
         tableName: 'Users',
-        timestamps: false // Tắt timestamps vì DB đã tự quản lý
+        timestamps: true
     });
+
+    User.associate = (models) => {
+        // Một User có thể có nhiều Order
+        User.hasMany(models.Order, {
+            foreignKey: 'userId',
+            as: 'orders'
+        });
+    };
 
     return User;
 };
