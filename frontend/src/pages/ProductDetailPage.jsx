@@ -4,6 +4,7 @@ import { fetchProductById, BACKEND_URL } from '../services/api'; // <-- CHỈNH 
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Minus, Plus, Heart, Maximize2, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 const ProductDetailPage = () => {
     const [product, setProduct] = useState(null);
@@ -15,6 +16,7 @@ const ProductDetailPage = () => {
     const { addToCart } = useCart();
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const { show } = useToast();
 
     useEffect(() => {
         const getProductData = async () => {
@@ -45,7 +47,7 @@ const ProductDetailPage = () => {
             return;
         }
         addToCart(product, quantity);
-        alert(`Đã thêm ${quantity} "${product.name}" vào giỏ hàng!`);
+        show(`Đã thêm ${quantity} "${product.name}" vào giỏ hàng!`, { type: 'success' });
     };
 
     const handleWishlist = () => {

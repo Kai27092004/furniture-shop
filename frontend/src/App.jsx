@@ -26,6 +26,7 @@ import RegisterPage from './pages/RegisterPage';
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
 import PaymentPage from './pages/PaymentPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 // Import các trang Admin
 import AdminLoginPage from './pages/admin/AdminLoginPage';
@@ -80,6 +81,7 @@ function App() {
               </ProtectedRoute> 
             } 
           />
+          <Route path="order-success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
         </Route>
         
       </Routes>

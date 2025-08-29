@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,12 @@ const CartPage = () => {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [error, setError] = useState('');
+
+    // NEW: ensure page is scrolled to top when this page mounts
+    useEffect(() => {
+        // scroll to top to avoid landing in the middle/bottom of the page
+        window.scrollTo({ top: 0, left: 0 });
+    }, []);
 
     const handleProceedToCheckout = async (e) => {
         e.preventDefault();

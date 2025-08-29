@@ -32,7 +32,7 @@ exports.createOrder = async (req, res) => {
             userId,
             totalAmount,
             shippingAddress,
-            customerNotes
+            customerNotes // Thêm ghi chú của khách hàng
         }, { transaction: t });
 
         // BƯỚC 3: TẠO CHI TIẾT ĐƠN HÀNG (ORDER ITEMS) VÀ CẬP NHẬT KHO
@@ -157,7 +157,6 @@ exports.getAllOrders = async (req, res) => {
 };
 
 // --- HÀM 5: [ADMIN] CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG ---
-// Chức năng: Admin cập nhật trạng thái của một đơn hàng bất kỳ.
 exports.adminUpdateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
@@ -171,7 +170,7 @@ exports.adminUpdateOrderStatus = async (req, res) => {
 
     try {
         const order = await db.Order.findByPk(orderId, {
-            include: [{ model: db.OrderItem, as: 'items' }], // Lấy các sản phẩm đi kèm
+            include: [{ model: db.OrderItem, as: 'items' }],
             transaction: t
         });
 
@@ -180,10 +179,9 @@ exports.adminUpdateOrderStatus = async (req, res) => {
             return res.status(404).send({ message: "Không tìm thấy đơn hàng." });
         }
 
-        // Logic hoàn kho nếu Admin hủy đơn (chỉ khi trạng thái thay đổi từ khác -> cancelled)
         if (order.status !== 'cancelled' && status === 'cancelled') {
             for (const item of order.items) {
-                if (item.productId) { // Kiểm tra sản phẩm còn tồn tại không
+                if (item.productId) {
                     await db.Product.increment('stockQuantity', {
                         by: item.quantity,
                         where: { id: item.productId },
@@ -193,14 +191,11 @@ exports.adminUpdateOrderStatus = async (req, res) => {
             }
         }
 
-        // Cập nhật trạng thái mới
         order.status = status;
         await order.save({ transaction: t });
 
-        // Commit transaction sau khi mọi thứ thành công
         await t.commit();
         
-        // Trả về đơn hàng đã được cập nhật
         const updatedOrder = await db.Order.findByPk(orderId, {
             include: [{ model: db.User, as: 'user', attributes: ['id', 'fullName', 'email'] }]
         });
@@ -210,5 +205,88 @@ exports.adminUpdateOrderStatus = async (req, res) => {
     } catch (error) {
         await t.rollback();
         res.status(500).send({ message: "Lỗi khi cập nhật trạng thái đơn hàng: " + error.message });
+    }
+};
+
+// --- HÀM 6: [ADMIN] LẤY CHI TIẾT MỘT ĐƠN HÀNG ---
+exports.getAdminOrderDetails = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        const order = await db.Order.findByPk(orderId, {
+            include: [
+                {
+                    model: db.User,
+                    as: 'user',
+                    attributes: ['id', 'fullName', 'email', 'phone', 'address']
+                },
+                {
+                    model: db.OrderItem,
+                    as: 'items',
+                    include: [{
+                        model: db.Product,
+                        as: 'product',
+                        attributes: ['id', 'name', 'imageUrl']
+                    }]
+                }
+            ]
+        });
+
+        if (!order) {
+            return res.status(404).send({ message: 'Không tìm thấy đơn hàng.' });
+        }
+
+        res.status(200).send(order);
+    } catch (error) {
+        res.status(500).send({ message: 'Lỗi khi lấy chi tiết đơn hàng: ' + error.message });
+    }
+};
+
+// --- HÀM 7: [ADMIN] XÓA ĐƠN HÀNG (CHỈ KHI ĐÃ HỦY) ---
+exports.adminDeleteOrder = async (req, res) => {
+    const { orderId } = req.params;
+
+    const t = await db.sequelize.transaction();
+
+    try {
+        const order = await db.Order.findByPk(orderId, {
+            include: [{ model: db.OrderItem, as: 'items' }],
+            transaction: t
+        });
+
+        if (!order) {
+            await t.rollback();
+            return res.status(404).send({ message: 'Không tìm thấy đơn hàng.' });
+        }
+
+        let cancelledDuringDelete = false;
+
+        // Nếu đơn chưa ở trạng thái cancelled, tự động hủy và hoàn kho trước khi xóa
+        if (order.status !== 'cancelled') {
+            for (const item of order.items) {
+                if (item.productId) {
+                    await db.Product.increment('stockQuantity', {
+                        by: item.quantity,
+                        where: { id: item.productId },
+                        transaction: t
+                    });
+                }
+            }
+            order.status = 'cancelled';
+            await order.save({ transaction: t });
+            cancelledDuringDelete = true;
+        }
+
+        await order.destroy({ transaction: t });
+
+        await t.commit();
+
+        return res.status(200).send({ 
+            message: 'Xóa đơn hàng thành công.',
+            cancelledDuringDelete
+        });
+    } catch (error) {
+        await t.rollback();
+        return res.status(500).send({ message: 'Lỗi khi xóa đơn hàng: ' + error.message });
     }
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BACKEND_URL } from '../../services/api';
 
 const ProductForm = ({ initialProduct, categories, onSubmit, onClose }) => {
     // State để lưu trữ dữ liệu của form
@@ -44,7 +45,14 @@ const ProductForm = ({ initialProduct, categories, onSubmit, onClose }) => {
     // Hàm xử lý khi submit form
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData); // Gọi hàm onSubmit từ component cha và truyền dữ liệu form
+        // Ép kiểu số và chuẩn hóa imageUrl (chỉ giữ lại filename)
+        const payload = {
+            ...formData,
+            price: formData.price ? Number(formData.price) : 0,
+            stockQuantity: formData.stockQuantity ? Number(formData.stockQuantity) : 0,
+            categoryId: formData.categoryId ? Number(formData.categoryId) : null,
+        };
+        onSubmit(payload);
     };
 
     return (
@@ -56,7 +64,12 @@ const ProductForm = ({ initialProduct, categories, onSubmit, onClose }) => {
                 <input name="price" type="number" value={formData.price} onChange={handleChange} placeholder="Giá" className="w-full p-2 border rounded" required />
                 <input name="stockQuantity" type="number" value={formData.stockQuantity} onChange={handleChange} placeholder="Số lượng kho" className="w-full p-2 border rounded" required />
             </div>
-            <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="URL Hình ảnh" className="w-full p-2 border rounded" required />
+            <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="URL Hình ảnh hoặc tên file trong /upload" className="w-full p-2 border rounded" required />
+            {formData.imageUrl && (
+                <div className="mt-2">
+                    <img src={`${BACKEND_URL}${formData.imageUrl.startsWith('/upload/') ? formData.imageUrl : `/upload/${formData.imageUrl.split('/').pop()}`}`} alt="Preview" className="w-24 h-24 object-cover rounded" />
+                </div>
+            )}
             <select name="categoryId" value={formData.categoryId} onChange={handleChange} className="w-full p-2 border rounded" required>
                 <option value="">-- Chọn Danh Mục --</option>
                 {categories.map(cat => (

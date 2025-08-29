@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-2xl' }) => {
     if (!isOpen) {
         return null;
     }
@@ -13,7 +13,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         >
             {/* Khung chứa nội dung modal */}
             <div 
-                className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative z-50"
+                className={`bg-white rounded-lg shadow-xl w-full ${maxWidth} p-6 relative z-50`}
                 onClick={e => e.stopPropagation()} // Ngăn việc bấm vào modal làm nó bị đóng
             >
                 {/* Header của Modal */}

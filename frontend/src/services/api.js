@@ -54,7 +54,13 @@ export const fetchUserProfile = () => API.get('/users/profile');
 export const fetchMyOrders = () => API.get('/users/my-orders');
 export const createOrder = (orderData) => API.post('/orders', orderData);
 // Hủy một đơn hàng
-export const cancelOrder = (orderId) => API.put(`/orders/${orderId}/cancel`);
+export const cancelOrder = (orderId) => API.post(`/orders/${orderId}/cancel`);
 export const updateOrderStatus = (orderId, status) => API.put(`/orders/${orderId}/status`, { status });
+
+// --- Admin: Orders ---
+export const adminFetchAllOrders = () => API.get('/orders/admin/all');
+export const adminFetchOrderDetails = (orderId) => API.get(`/orders/admin/${orderId}`);
+export const adminUpdateOrderStatus = (orderId, status) => API.put(`/orders/admin/${orderId}/status`, { status });
+export const adminDeleteOrder = (orderId) => API.delete(`/orders/admin/${orderId}`);
 
 export default API;

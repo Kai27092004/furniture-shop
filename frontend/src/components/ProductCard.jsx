@@ -5,16 +5,18 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Eye, Heart, ShoppingCart, Star } from 'lucide-react';
 import { BACKEND_URL } from '../services/api'; // <-- THÊM DÒNG NÀY
+import { useToast } from '../context/ToastContext';
 
 const ProductCard = ({ product }) => {
     const { addToCart } = useCart();
+    const { show } = useToast();
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     const handleAddToCart = () => {
         if (isAuthenticated) {
             addToCart(product);
-            alert('Đã thêm sản phẩm vào giỏ hàng!');
+            show('Đã thêm vào giỏ hàng!', { type: 'success' });
         } else {
             alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.');
             navigate('/login');

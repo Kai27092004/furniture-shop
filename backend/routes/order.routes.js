@@ -38,6 +38,13 @@ router.get(
     controller.getAllOrders
 );
 
+// [ADMIN] Lấy chi tiết một đơn hàng
+router.get(
+    '/admin/:orderId',
+    [isAuthenticated, isAdmin],
+    controller.getAdminOrderDetails
+);
+
 // [ADMIN] Cập nhật trạng thái của một đơn hàng bất kỳ
 router.put(
     '/admin/:orderId/status',
@@ -45,6 +52,12 @@ router.put(
     controller.adminUpdateOrderStatus
 );
 
+// [ADMIN] Xóa đơn hàng (chỉ khi đã cancelled)
+router.delete(
+    '/admin/:orderId',
+    [isAuthenticated, isAdmin],
+    controller.adminDeleteOrder
+);
 
 
 module.exports = router;

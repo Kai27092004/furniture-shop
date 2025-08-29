@@ -49,9 +49,8 @@ const PaymentPage = () => {
         setError('');
         try {
             await updateOrderStatus(orderId, 'processing');
-            alert('Thanh toán thành công!');
             clearCart();
-            navigate('/profile');
+            navigate('/order-success', { state: { orderId } });
         } catch (err) {
             const errorMessage = err.response?.data?.message || 'Có lỗi xảy ra khi xác nhận thanh toán.';
             setError(errorMessage);
