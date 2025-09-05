@@ -7,8 +7,25 @@ const Category = db.Category;
 // Chức năng: Lấy tất cả danh mục (dùng cho cả User và Admin).
 exports.getAllCategories = async (req, res) => {
     try {
-        const categories = await db.Category.findAll();
-        res.status(200).send(categories);
+        const categories = await db.Category.findAll({
+            include: [{
+                model: db.Product,
+                as: 'products',
+                attributes: ['id']
+            }]
+        });
+        
+        // Format data để trả về
+        const formattedCategories = categories.map(category => ({
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            productCount: category.products ? category.products.length : 0,
+            createdAt: category.createdAt,
+            updatedAt: category.updatedAt
+        }));
+        
+        res.status(200).send(formattedCategories);
     } catch (error) {
         res.status(500).send({ message: error.message });
     }

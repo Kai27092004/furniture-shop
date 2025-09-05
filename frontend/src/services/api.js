@@ -44,6 +44,9 @@ export const fetchProductsByCategory = (categoryId) => API.get(`/products?catego
 
 // --- Categories ---
 export const fetchCategories = () => API.get('/categories');
+export const createCategory = (categoryData) => API.post('/categories', categoryData);
+export const updateCategory = (id, categoryData) => API.put(`/categories/${id}`, categoryData);
+export const deleteCategory = (id) => API.delete(`/categories/${id}`);
 
 
 // --- User Profile ---
