@@ -66,4 +66,11 @@ export const adminFetchOrderDetails = (orderId) => API.get(`/orders/admin/${orde
 export const adminUpdateOrderStatus = (orderId, status) => API.put(`/orders/admin/${orderId}/status`, { status });
 export const adminDeleteOrder = (orderId) => API.delete(`/orders/admin/${orderId}`);
 
+// --- Admin: Users ---
+export const adminGetUserStats = () => API.get('/users/admin/stats');
+export const adminGetAllUsers = (params = {}) => API.get('/users/admin/all', { params });
+export const adminCreateUser = (userData) => API.post('/users/admin/create', userData);
+export const adminUpdateUser = (id, userData) => API.put(`/users/admin/${id}`, userData);
+export const adminDeleteUser = (id) => API.delete(`/users/admin/${id}`);
+
 export default API;

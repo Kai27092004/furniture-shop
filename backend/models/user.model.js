@@ -1,4 +1,5 @@
 // File: backend/models/user.model.js
+const bcrypt = require('bcryptjs');
 
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define('User', {
@@ -36,6 +37,22 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'Users',
         timestamps: true
+    });
+
+    // Hook để hash password trước khi tạo user
+    User.beforeCreate(async (user) => {
+        if (user.password) {
+            const saltRounds = 12;
+            user.password = await bcrypt.hash(user.password, saltRounds);
+        }
+    });
+
+    // Hook để hash password trước khi cập nhật user (nếu password thay đổi)
+    User.beforeUpdate(async (user) => {
+        if (user.changed('password') && user.password) {
+            const saltRounds = 12;
+            user.password = await bcrypt.hash(user.password, saltRounds);
+        }
     });
 
     User.associate = (models) => {

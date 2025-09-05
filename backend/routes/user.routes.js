@@ -9,9 +9,12 @@ router.use(isAuthenticated);
 
 router.get('/profile', controller.getProfile);
 router.get('/my-orders', controller.getMyOrders);
-// Route cho admin
-router.get('/all', isAuthenticated, isAdmin, controller.getAllUsers);
 
-module.exports = router;
+// Routes cho admin
+router.get('/admin/stats', isAdmin, controller.getUserStats);
+router.get('/admin/all', isAdmin, controller.getAllUsers);
+router.post('/admin/create', isAdmin, controller.createUser);
+router.put('/admin/:id', isAdmin, controller.updateUser);
+router.delete('/admin/:id', isAdmin, controller.deleteUser);
 
 module.exports = router;

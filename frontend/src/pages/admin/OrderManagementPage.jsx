@@ -265,7 +265,7 @@ const OrderManagementPage = () => {
     return (
         <div className="container mx-auto">
             {/* Header */}
-            <div className="flex flex-col gap-1 mb-6">
+            <div className="bg-white p-4 rounded-lg shadow border mb-6">
                 <h1 className="text-3xl font-bold text-gray-900">Quản Lý Đơn hàng</h1>
                 <p className="text-sm text-gray-500">Quản lý tất cả đơn hàng của khách hàng</p>
             </div>
