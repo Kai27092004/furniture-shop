@@ -73,4 +73,9 @@ export const adminCreateUser = (userData) => API.post('/users/admin/create', use
 export const adminUpdateUser = (id, userData) => API.put(`/users/admin/${id}`, userData);
 export const adminDeleteUser = (id) => API.delete(`/users/admin/${id}`);
 
+// --- Admin: Dashboard ---
+export const getDashboardStats = () => API.get('/dashboard/stats');
+export const getRevenueChartData = (year = 2025) => API.get(`/dashboard/revenue-chart?year=${year}`);
+export const getOrderChartData = (year = 2025) => API.get(`/dashboard/order-chart?year=${year}`);
+
 export default API;

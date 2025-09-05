@@ -32,7 +32,7 @@ const AdminLayout = () => {
     }`;
 
   const navigation = [
-    { name: "Dashboard", href: "/admin/dashboard", icon: HomeIcon },
+    { name: "Trang Quản Trị", href: "/admin/dashboard", icon: HomeIcon },
     { name: "Quản lý Đơn hàng", href: "/admin/orders", icon: ClipboardDocumentListIcon },
     { name: "Quản lý Sản phẩm", href: "/admin/products", icon: ShoppingBagIcon },
     { name: "Quản lý Danh mục", href: "/admin/categories", icon: TagIcon },
