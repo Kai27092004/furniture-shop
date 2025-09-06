@@ -40,9 +40,18 @@ const AdminDashboardPage = () => {
     const [darkMode, setDarkMode] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [chartLoading, setChartLoading] = useState(false);
 
+    // Fetch initial data
     useEffect(() => {
         fetchDashboardData();
+    }, []);
+
+    // Fetch chart data when year changes
+    useEffect(() => {
+        if (selectedYear) {
+            fetchChartData();
+        }
     }, [selectedYear]);
 
     // Close dropdown when clicking outside
@@ -89,6 +98,30 @@ const AdminDashboardPage = () => {
         } finally {
             setLoading(false);
             setRefreshing(false);
+        }
+    };
+
+    const fetchChartData = async () => {
+        try {
+            setChartLoading(true);
+            setError(null);
+            
+            const [revenueRes, orderRes] = await Promise.all([
+                api.get(`/dashboard/revenue-chart?year=${selectedYear}`),
+                api.get(`/dashboard/order-chart?year=${selectedYear}`)
+            ]);
+
+            if (revenueRes.data.success) {
+                setRevenueData(revenueRes.data.data);
+            }
+            if (orderRes.data.success) {
+                setOrderData(orderRes.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching chart data:', error);
+            setError('Không thể tải dữ liệu biểu đồ. Vui lòng thử lại.');
+        } finally {
+            setChartLoading(false);
         }
     };
 
@@ -296,7 +329,16 @@ const AdminDashboardPage = () => {
                             </div>
                         </div>
                         <div className="h-64 sm:h-80">
-                            {revenueData.length > 0 ? (
+                            {chartLoading ? (
+                                <div className="flex items-center justify-center h-full">
+                                    <div className="text-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                            Đang tải dữ liệu...
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : revenueData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <ComposedChart data={revenueData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} />
@@ -375,7 +417,16 @@ const AdminDashboardPage = () => {
                             </div>
                         </div>
                         <div className="h-64 sm:h-80">
-                            {orderData.length > 0 ? (
+                            {chartLoading ? (
+                                <div className="flex items-center justify-center h-full">
+                                    <div className="text-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                            Đang tải dữ liệu...
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : orderData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={orderData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#e5e7eb'} />
