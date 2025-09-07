@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '../../services/api';
 import Modal from '../../components/common/Modal';
+import { useToast } from '../../context/ToastContext';
 
 const CategoryManagementPage = () => {
     const [categories, setCategories] = useState([]);
@@ -9,6 +11,13 @@ const CategoryManagementPage = () => {
     const [formData, setFormData] = useState({ name: '', description: '' });
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    
+    // State cho Modal xác nhận xóa
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
+    
+    // Toast hook
+    const { show } = useToast();
 
     useEffect(() => {
         loadCategories();
@@ -30,14 +39,16 @@ const CategoryManagementPage = () => {
         try {
             if (editingCategory) {
                 await updateCategory(editingCategory.id, formData);
+                show('Cập nhật danh mục thành công!', { type: 'success' });
             } else {
                 await createCategory(formData);
+                show('Thêm danh mục mới thành công!', { type: 'success' });
             }
             loadCategories();
             handleCloseModal();
         } catch (error) {
             console.error('Lỗi khi lưu danh mục:', error);
-            alert(error.response?.data?.message || 'Có lỗi xảy ra');
+            show('Lưu danh mục thất bại.', { type: 'error' });
         }
     };
 
@@ -47,15 +58,28 @@ const CategoryManagementPage = () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Bạn có chắc muốn xóa danh mục này?')) {
-            try {
-                await deleteCategory(id);
-                loadCategories();
-            } catch (error) {
-                console.error('Lỗi khi xóa danh mục:', error);
-                alert(error.response?.data?.message || 'Có lỗi xảy ra');
-            }
+    const openDeleteConfirm = (category) => {
+        setCategoryToDelete(category);
+        setConfirmDeleteOpen(true);
+    };
+
+    const closeDeleteConfirm = () => {
+        setConfirmDeleteOpen(false);
+        setCategoryToDelete(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!categoryToDelete) return;
+        
+        try {
+            await deleteCategory(categoryToDelete.id);
+            show('Xóa danh mục thành công!', { type: 'success' });
+            loadCategories();
+            closeDeleteConfirm();
+        } catch (error) {
+            console.error('Lỗi khi xóa danh mục:', error);
+            show('Xóa danh mục thất bại.', { type: 'error' });
+            closeDeleteConfirm();
         }
     };
 
@@ -132,22 +156,20 @@ const CategoryManagementPage = () => {
                             <span className="text-blue-600 font-medium">
                                 Số sản phẩm: {category.productCount}
                             </span>
-                            <div className="flex space-x-2">
+                            <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => handleEdit(category)}
-                                    className="p-1 text-blue-600 hover:text-blue-800"
+                                    title="Chỉnh sửa"
+                                    className="text-green-600 hover:text-green-800"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
+                                    <PencilSquareIcon className="w-5 h-5" />
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(category.id)}
-                                    className="p-1 text-red-600 hover:text-red-800"
+                                    onClick={() => openDeleteConfirm(category)}
+                                    title="Xóa"
+                                    className="text-red-600 hover:text-red-800"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                    <TrashIcon className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>
@@ -201,6 +223,35 @@ const CategoryManagementPage = () => {
                         </button>
                     </div>
                 </form>
+            </Modal>
+
+            {/* Modal xác nhận xóa danh mục */}
+            <Modal 
+                isOpen={confirmDeleteOpen} 
+                onClose={closeDeleteConfirm} 
+                title="Xác nhận xóa danh mục"
+                maxWidth="max-w-md"
+            >
+                <div className="space-y-4">
+                    <p className="text-gray-900">
+                        Bạn có chắc chắn muốn xóa danh mục <span className="font-semibold">"{categoryToDelete?.name}"</span>?
+                    </p>
+                    <p className="text-sm text-gray-600">Hành động này không thể hoàn tác.</p>
+                    <div className="flex items-center justify-end gap-3">
+                        <button 
+                            onClick={closeDeleteConfirm} 
+                            className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            HỦY
+                        </button>
+                        <button 
+                            onClick={handleConfirmDelete} 
+                            className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                        >
+                            XÁC NHẬN
+                        </button>
+                    </div>
+                </div>
             </Modal>
         </>
     );

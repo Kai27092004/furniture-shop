@@ -4,9 +4,11 @@ import {
     adminFetchAllOrders,
     adminFetchOrderDetails,
     adminUpdateOrderStatus,
-    adminDeleteOrder
+    adminDeleteOrder,
+    BACKEND_URL
 } from '../../services/api';
 import Modal from '../../components/common/Modal';
+import { useToast } from '../../context/ToastContext';
 
 const OrderManagementPage = () => {
     const [orders, setOrders] = useState([]);
@@ -21,6 +23,10 @@ const OrderManagementPage = () => {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [orderToDelete, setOrderToDelete] = useState(null);
     
+    // State cho Modal xác nhận cập nhật trạng thái
+    const [statusConfirmOpen, setStatusConfirmOpen] = useState(false);
+    const [statusUpdateData, setStatusUpdateData] = useState(null);
+    
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [ordersPerPage] = useState(10);
@@ -29,6 +35,9 @@ const OrderManagementPage = () => {
     const [exporting, setExporting] = useState(false);
     // Sort by date
     const [sortDate, setSortDate] = useState('desc');
+    
+    // Toast hook
+    const { show } = useToast();
 
     useEffect(() => {
         loadOrders();
@@ -109,25 +118,21 @@ const OrderManagementPage = () => {
         setOrderToDelete(null);
     };
 
-    const handleConfirmDelete = async () => {
-        if (!orderToDelete) return;
-        try {
-            await adminDeleteOrder(orderToDelete.id);
-            await loadOrders();
-            closeDeleteConfirm();
-        } catch (e) {
-            console.error(e);
-            closeDeleteConfirm();
-        }
+    const openStatusConfirm = (orderId, newStatus, oldStatus) => {
+        setStatusUpdateData({ orderId, newStatus, oldStatus });
+        setStatusConfirmOpen(true);
     };
 
-    const handleChangeStatus = async (orderId, newStatus, oldStatus) => {
-        if (newStatus === oldStatus) return;
-        
-        if (!window.confirm(`Bạn có chắc chắn muốn thay đổi trạng thái đơn hàng #${orderId} từ "${getStatusLabel(oldStatus)}" thành "${getStatusLabel(newStatus)}"?`)) {
-            return;
-        }
+    const closeStatusConfirm = () => {
+        setStatusConfirmOpen(false);
+        setStatusUpdateData(null);
+    };
 
+    const handleConfirmStatusUpdate = async () => {
+        if (!statusUpdateData) return;
+        
+        const { orderId, newStatus, oldStatus } = statusUpdateData;
+        
         try {
             setUpdatingStatusId(orderId);
             await adminUpdateOrderStatus(orderId, newStatus);
@@ -142,13 +147,34 @@ const OrderManagementPage = () => {
             }
             
             // Show success message
-            alert(`Cập nhật trạng thái đơn hàng #${orderId} thành công!`);
+            show(`Cập nhật trạng thái đơn hàng #${orderId} thành công!`, { type: 'success' });
+            closeStatusConfirm();
         } catch (e) {
             console.error(e);
-            alert('Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+            show('Cập nhật trạng thái thất bại. Vui lòng thử lại.', { type: 'error' });
+            closeStatusConfirm();
         } finally {
             setUpdatingStatusId(null);
         }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!orderToDelete) return;
+        try {
+            await adminDeleteOrder(orderToDelete.id);
+            show('Xóa đơn hàng thành công!', { type: 'success' });
+            await loadOrders();
+            closeDeleteConfirm();
+        } catch (e) {
+            console.error(e);
+            show('Xóa đơn hàng thất bại.', { type: 'error' });
+            closeDeleteConfirm();
+        }
+    };
+
+    const handleChangeStatus = (orderId, newStatus, oldStatus) => {
+        if (newStatus === oldStatus) return;
+        openStatusConfirm(orderId, newStatus, oldStatus);
     };
 
     const getStatusLabel = (status) => {
@@ -203,10 +229,10 @@ const OrderManagementPage = () => {
             link.click();
             document.body.removeChild(link);
             
-            alert('Xuất dữ liệu thành công!');
+            show('Xuất dữ liệu thành công!', { type: 'success' });
         } catch (error) {
             console.error('Lỗi khi xuất dữ liệu:', error);
-            alert('Xuất dữ liệu thất bại. Vui lòng thử lại.');
+            show('Xuất dữ liệu thất bại. Vui lòng thử lại.', { type: 'error' });
         } finally {
             setExporting(false);
         }
@@ -526,12 +552,27 @@ const OrderManagementPage = () => {
                                     {selectedOrder.items?.map(item => (
                                         <tr key={item.id} className="text-sm border-t">
                                             <td className="px-2 py-2">
-                                                <div className="flex items-center gap-2">
-                                                    {item.product?.imageUrl && (
-                                                        <img src={item.product.imageUrl} alt={item.product?.name} className="w-10 h-10 rounded object-cover" />
-                                                    )}
-                                                    <div>
-                                                        <div className="font-medium">{item.product?.name || `Sản phẩm #${item.productId}`}</div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-shrink-0">
+                                                        {item.product?.imageUrl ? (
+                                                            <img 
+                                                                src={`${BACKEND_URL}${item.product.imageUrl}`} 
+                                                                alt={item.product?.name || 'Sản phẩm'} 
+                                                                className="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm"
+                                                                onError={(e) => {
+                                                                    e.target.src = 'https://via.placeholder.com/48x48/f3f4f6/9ca3af?text=No+Image';
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-12 h-12 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
+                                                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                </svg>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-medium text-gray-900 truncate">{item.product?.name || `Sản phẩm #${item.productId}`}</div>
                                                         <div className="text-xs text-gray-500">Mã: {item.productId}</div>
                                                     </div>
                                                 </div>
@@ -576,6 +617,50 @@ const OrderManagementPage = () => {
                     <div className="flex items-center justify-end gap-3">
                         <button onClick={closeDeleteConfirm} className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50">HỦY</button>
                         <button onClick={handleConfirmDelete} className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">XÁC NHẬN</button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Confirm Status Update Modal */}
+            <Modal isOpen={statusConfirmOpen} onClose={closeStatusConfirm} title="Xác nhận cập nhật trạng thái" maxWidth="max-w-md">
+                <div className="space-y-4">
+                    <p className="text-gray-900">
+                        Bạn có chắc chắn muốn thay đổi trạng thái đơn hàng{' '}
+                        <span className="font-semibold">#{statusUpdateData?.orderId}</span> từ{' '}
+                        <span className="font-medium text-orange-600">"{getStatusLabel(statusUpdateData?.oldStatus)}"</span> thành{' '}
+                        <span className="font-medium text-green-600">"{getStatusLabel(statusUpdateData?.newStatus)}"</span>?
+                    </p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="flex items-start">
+                            <svg className="w-5 h-5 text-blue-400 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div className="text-sm text-blue-800">
+                                <p className="font-medium">Lưu ý:</p>
+                                <p>Thay đổi trạng thái đơn hàng sẽ được gửi thông báo đến khách hàng.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-end gap-3">
+                        <button 
+                            onClick={closeStatusConfirm} 
+                            className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            HỦY
+                        </button>
+                        <button 
+                            onClick={handleConfirmStatusUpdate} 
+                            disabled={updatingStatusId === statusUpdateData?.orderId}
+                            className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                        >
+                            {updatingStatusId === statusUpdateData?.orderId && (
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            )}
+                            {updatingStatusId === statusUpdateData?.orderId ? 'Đang cập nhật...' : 'XÁC NHẬN'}
+                        </button>
                     </div>
                 </div>
             </Modal>

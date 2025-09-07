@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { fetchProducts, deleteProduct, createProduct, updateProduct, fetchCategories, BACKEND_URL } from '../../services/api';
 import Modal from '../../components/common/Modal';
 import ProductForm from '../../components/admin/ProductForm';
@@ -26,6 +27,10 @@ const ProductManagementPage = () => {
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     
+    // State cho pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [productsPerPage] = useState(10);
+    
     // Toast hook
     const { show } = useToast();
 
@@ -36,6 +41,7 @@ const ProductManagementPage = () => {
     // Effect để lọc sản phẩm khi searchTerm hoặc selectedCategory thay đổi
     useEffect(() => {
         filterProducts();
+        setCurrentPage(1); // Reset về trang đầu khi lọc
     }, [products, searchTerm, selectedCategory]);
 
     const loadInitialData = async () => {
@@ -74,6 +80,12 @@ const ProductManagementPage = () => {
 
         setFilteredProducts(filtered);
     };
+
+    // Pagination logic
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
     // Hàm xử lý thay đổi tìm kiếm
     const handleSearchChange = (e) => {
@@ -156,12 +168,13 @@ const ProductManagementPage = () => {
     if (loading) return <p>Đang tải...</p>;
 
     return (
-        <div className="p-6">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-center mb-6">
+        <div className="container mx-auto">
+            {/* Header */}
+            <div className="bg-white p-4 rounded-lg shadow border mb-6">
+                <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-xl font-medium">Quản lý Sản phẩm</h1>
-                        <p className="text-gray-500 text-sm">Thêm, sửa, xóa và quản lý các sản phẩm</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Quản Lý Sản phẩm</h1>
+                        <p className="text-sm text-gray-500">Thêm, sửa, xóa và quản lý các sản phẩm</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center">
@@ -178,92 +191,116 @@ const ProductManagementPage = () => {
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex justify-between items-center mb-4">
-                    <div className="relative flex-1 max-w-md">
+            {/* Search and Filter */}
+            <div className="bg-white p-4 rounded-lg shadow border mb-6">
+                <div className="flex flex-col lg:flex-row gap-4">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Tìm kiếm
+                        </label>
                         <input
                             type="text"
-                            placeholder="Tìm kiếm theo tên sản phẩm..."
                             value={searchTerm}
                             onChange={handleSearchChange}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                            placeholder="Tìm theo tên sản phẩm..."
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
-                        <svg 
-                            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
                     </div>
-                    <select 
-                        value={selectedCategory}
-                        onChange={handleCategoryChange}
-                        className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
-                    >
-                        <option value="">Tất cả danh mục</option>
-                        {categories.map(category => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="lg:w-48">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Danh mục
+                        </label>
+                        <select
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            value={selectedCategory}
+                            onChange={handleCategoryChange}
+                        >
+                            <option value="">Tất cả danh mục</option>
+                            {categories.map(category => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
+            </div>
 
-                <div className="bg-white rounded-lg overflow-x-auto">
+            {/* Products Table */}
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden border">
+                <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr className="text-left text-sm font-medium text-gray-500">
-                                <th className="py-3 px-4">ID</th>
-                                <th className="py-3 px-4">Hình Ảnh</th>
-                                <th className="py-3 px-4">Tên Sản Phẩm</th>
-                                <th className="py-3 px-4">Giá</th>
-                                <th className="py-3 px-4">Số Lượng</th>
-                                <th className="py-3 px-4 text-center">Thao tác</th>
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    ID
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Hình Ảnh
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tên Sản Phẩm
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Giá
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Số Lượng
+                                </th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Hành động
+                                </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            {filteredProducts.length > 0 ? (
-                                filteredProducts.map(product => (
-                                    <tr key={product.id} className="hover:bg-gray-50">
-                                        <td className="py-3 px-4">{product.id}</td>
-                                        <td className="py-3 px-4">
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {currentProducts.length > 0 ? (
+                                currentProducts.map(product => (
+                                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {product.id}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
                                             <img 
                                                 src={`${BACKEND_URL}${product.imageUrl}`} 
                                                 alt={product.name} 
                                                 className="w-12 h-12 object-cover rounded"
                                             />
                                         </td>
-                                        <td className="py-3 px-4">{product.name}</td>
-                                        <td className="py-3 px-4">{new Intl.NumberFormat('vi-VN').format(product.price)} đ</td>
-                                        <td className="py-3 px-4">{product.stockQuantity}</td>
-                                        <td className="py-3 px-4 text-center">
-                                            <div className="flex justify-center space-x-2">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {product.name}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <span className="font-semibold">
+                                                {new Intl.NumberFormat('vi-VN').format(product.price)} đ
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {product.stockQuantity}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                            <div className="flex items-center gap-3 justify-center">
                                                 <button
                                                     onClick={() => openProductDetail(product)}
-                                                    className="text-blue-600 hover:text-blue-800"
+                                                    title="Xem chi tiết"
+                                                    className="text-indigo-600 hover:text-indigo-900"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
+                                                    <EyeIcon className="w-5 h-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleOpenModalForEdit(product)}
+                                                    title="Chỉnh sửa"
                                                     className="text-green-600 hover:text-green-800"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                    </svg>
+                                                    <PencilSquareIcon className="w-5 h-5" />
                                                 </button>
                                                 <button
                                                     onClick={() => openDeleteConfirm(product)}
+                                                    title="Xóa"
                                                     className="text-red-600 hover:text-red-800"
                                                 >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
+                                                    <TrashIcon className="w-5 h-5" />
                                                 </button>
                                             </div>
                                         </td>
@@ -271,25 +308,65 @@ const ProductManagementPage = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="py-8 px-4 text-center text-gray-500">
-                                        <div className="flex flex-col items-center">
-                                            <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            <p className="text-lg font-medium mb-1">Không tìm thấy sản phẩm</p>
-                                            <p className="text-sm">
-                                                {searchTerm || selectedCategory 
-                                                    ? "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc danh mục" 
-                                                    : "Chưa có sản phẩm nào trong hệ thống"
-                                                }
-                                            </p>
-                                        </div>
+                                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                        {filteredProducts.length === 0 ? 'Không có sản phẩm nào' : 'Không tìm thấy sản phẩm phù hợp'}
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="bg-white px-4 py-3 flex items-center justify-center border-t border-gray-200 sm:px-6">
+                        <div className="flex-1 flex justify-center sm:hidden">
+                            <button
+                                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                disabled={currentPage === 1}
+                                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Trước
+                            </button>
+                            <button
+                                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                disabled={currentPage === totalPages}
+                                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Sau
+                            </button>
+                        </div>
+                        <div className="hidden sm:flex w-full sm:items-center sm:justify-center">
+                            <div>
+                                <nav className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                        disabled={currentPage === 1}
+                                        className="w-8 h-8 rounded-full border flex items-center justify-center text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        ‹
+                                    </button>
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-8 h-8 rounded-full border text-sm ${page === currentPage ? 'bg-indigo-600 border-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="w-8 h-8 rounded-full border flex items-center justify-center text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        ›
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <Modal 

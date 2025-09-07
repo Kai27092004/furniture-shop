@@ -15,7 +15,7 @@ import {
 import { useAuth } from '../../context/AuthContext'; // Sửa lại đường dẫn và hook cho đúng
 
 const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Default to open on desktop
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -45,8 +45,9 @@ const AdminLayout = () => {
         <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
         <button
           type="button"
-          className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 md:hidden"
+          className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
           onClick={() => setSidebarOpen(false)}
+          title="Đóng Admin Panel"
         >
           <XMarkIcon className="h-6 w-6" />
         </button>
@@ -88,23 +89,24 @@ const AdminLayout = () => {
       {sidebarOpen && <div className="fixed inset-0 bg-black opacity-30 z-20 md:hidden" onClick={() => setSidebarOpen(false)}></div>}
 
       {/* Sidebar */}
-      <aside className={`bg-white shadow-xl w-64 fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-200 ease-in-out z-30 flex flex-col`}>
+      <aside className={`bg-white shadow-xl w-64 fixed inset-y-0 left-0 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:transform-none transition-transform duration-200 ease-in-out z-30 flex flex-col ${!sidebarOpen ? 'md:hidden' : ''}`}>
         <SidebarContent />
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ${sidebarOpen ? 'md:ml-0' : 'md:ml-0'}`}>
         {/* Header */}
         <header className="flex h-16 items-center justify-between bg-white px-4 shadow-sm border-b border-gray-200">
           <div className="flex items-center">
             <button
               type="button"
-              className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 mr-4 md:hidden"
+              className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 mr-4"
               onClick={() => setSidebarOpen(!sidebarOpen)}
+              title={sidebarOpen ? "Đóng Admin Panel" : "Mở Admin Panel"}
             >
               <Bars3Icon className="h-6 w-6" />
             </button>
-            <h2 className="text-2xl font-bold text-gray-900 hidden md:block">Dashboard</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
           </div>
 
           <div className="flex items-center space-x-4">

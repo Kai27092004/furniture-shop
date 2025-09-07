@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { 
     adminGetUserStats, 
     adminGetAllUsers, 
@@ -7,6 +8,7 @@ import {
     adminDeleteUser 
 } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
+import Modal from '../../components/common/Modal';
 
 const UserManagementPage = () => {
     const { show: showToast } = useToast();
@@ -17,6 +19,10 @@ const UserManagementPage = () => {
     const [roleFilter, setRoleFilter] = useState('all');
     const [showUserForm, setShowUserForm] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    
+    // State cho Modal xác nhận xóa
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     // Load data
     useEffect(() => {
@@ -39,15 +45,27 @@ const UserManagementPage = () => {
         }
     };
 
-    const handleDeleteUser = async (userId, userName) => {
-        if (window.confirm(`Bạn có chắc chắn muốn xóa người dùng "${userName}"?`)) {
-            try {
-                await adminDeleteUser(userId);
-                showToast('Xóa người dùng thành công', { type: 'success' });
-                loadData();
-            } catch (error) {
-                showToast('Lỗi khi xóa người dùng: ' + (error.response?.data?.message || error.message), { type: 'error' });
-            }
+    const openDeleteConfirm = (user) => {
+        setUserToDelete(user);
+        setConfirmDeleteOpen(true);
+    };
+
+    const closeDeleteConfirm = () => {
+        setConfirmDeleteOpen(false);
+        setUserToDelete(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!userToDelete) return;
+        
+        try {
+            await adminDeleteUser(userToDelete.id);
+            showToast('Xóa người dùng thành công!', { type: 'success' });
+            loadData();
+            closeDeleteConfirm();
+        } catch (error) {
+            showToast('Xóa người dùng thất bại.', { type: 'error' });
+            closeDeleteConfirm();
         }
     };
 
@@ -256,22 +274,20 @@ const UserManagementPage = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div className="flex space-x-2">
+                                            <div className="flex items-center gap-3">
                                                 <button
                                                     onClick={() => handleEditUser(user)}
-                                                    className="text-indigo-600 hover:text-indigo-900"
+                                                    title="Chỉnh sửa"
+                                                    className="text-green-600 hover:text-green-800"
                                                 >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
+                                                    <PencilSquareIcon className="w-5 h-5" />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDeleteUser(user.id, user.fullName)}
-                                                    className="text-red-600 hover:text-red-900"
+                                                    onClick={() => openDeleteConfirm(user)}
+                                                    title="Xóa"
+                                                    className="text-red-600 hover:text-red-800"
                                                 >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
+                                                    <TrashIcon className="w-5 h-5" />
                                                 </button>
                                             </div>
                                         </td>
@@ -281,6 +297,35 @@ const UserManagementPage = () => {
                         </table>
                     </div>
                 </div>
+
+                {/* Modal xác nhận xóa người dùng */}
+                <Modal 
+                    isOpen={confirmDeleteOpen} 
+                    onClose={closeDeleteConfirm} 
+                    title="Xác nhận xóa người dùng"
+                    maxWidth="max-w-md"
+                >
+                    <div className="space-y-4">
+                        <p className="text-gray-900">
+                            Bạn có chắc chắn muốn xóa người dùng <span className="font-semibold">"{userToDelete?.fullName}"</span>?
+                        </p>
+                        <p className="text-sm text-gray-600">Hành động này không thể hoàn tác.</p>
+                        <div className="flex items-center justify-end gap-3">
+                            <button 
+                                onClick={closeDeleteConfirm} 
+                                className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                HỦY
+                            </button>
+                            <button 
+                                onClick={handleConfirmDelete} 
+                                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                            >
+                                XÁC NHẬN
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
 
                 {/* User Form Modal */}
                 {showUserForm && (
@@ -308,118 +353,240 @@ const UserFormModal = ({ user, onClose, onSubmit }) => {
         address: user?.address || '',
         role: user?.role || 'customer'
     });
+    const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e) => {
+    const validateForm = () => {
+        const newErrors = {};
+        
+        if (!formData.fullName.trim()) {
+            newErrors.fullName = 'Vui lòng nhập họ tên';
+        } else if (formData.fullName.trim().length < 2) {
+            newErrors.fullName = 'Họ tên phải có ít nhất 2 ký tự';
+        }
+        
+        if (!formData.email.trim()) {
+            newErrors.email = 'Vui lòng nhập email';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = 'Email không hợp lệ';
+        }
+        
+        if (!user && !formData.password.trim()) {
+            newErrors.password = 'Vui lòng nhập mật khẩu';
+        } else if (formData.password && formData.password.length < 6) {
+            newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+        }
+        
+        if (formData.phone && !/^[0-9+\-\s()]+$/.test(formData.phone)) {
+            newErrors.phone = 'Số điện thoại không hợp lệ';
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validation
-        if (!formData.fullName.trim()) {
-            alert('Vui lòng nhập họ tên');
-            return;
-        }
-        if (!formData.email.trim()) {
-            alert('Vui lòng nhập email');
-            return;
-        }
-        if (!user && !formData.password.trim()) {
-            alert('Vui lòng nhập mật khẩu');
+        if (!validateForm()) {
             return;
         }
         
-        const submitData = { ...formData };
-        if (user && !submitData.password.trim()) {
-            delete submitData.password;
-        }
+        setIsSubmitting(true);
         
-        onSubmit(submitData);
+        try {
+            const submitData = { ...formData };
+            if (user && !submitData.password.trim()) {
+                delete submitData.password;
+            }
+            
+            await onSubmit(submitData);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleInputChange = (field, value) => {
+        setFormData({ ...formData, [field]: value });
+        // Clear error when user starts typing
+        if (errors[field]) {
+            setErrors({ ...errors, [field]: '' });
+        }
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-                <h2 className="text-xl font-bold mb-4">
-                    {user ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
+        <Modal 
+            isOpen={true} 
+            onClose={onClose} 
+            title={user ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}
+            maxWidth="max-w-2xl"
+        >
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Họ tên */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
-                        <input
-                            type="text"
-                            required
-                            value={formData.fullName}
-                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input
-                            type="email"
-                            required
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Mật khẩu {user && '(để trống nếu không thay đổi)'}
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Họ tên <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            type="password"
-                            required={!user}
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={formData.fullName}
+                                onChange={(e) => handleInputChange('fullName', e.target.value)}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
+                                    errors.fullName ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                }`}
+                                placeholder="Nhập họ và tên đầy đủ"
+                            />
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        {errors.fullName && (
+                            <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
+                        )}
                     </div>
+
+                    {/* Email */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-                        <input
-                            type="tel"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Email <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
+                                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                }`}
+                                placeholder="example@email.com"
+                            />
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                </svg>
+                            </div>
+                        </div>
+                        {errors.email && (
+                            <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                        )}
                     </div>
+
+                    {/* Mật khẩu */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-                        <textarea
-                            value={formData.address}
-                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows={3}
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Mật khẩu {user && <span className="text-gray-500">(để trống nếu không thay đổi)</span>}
+                            {!user && <span className="text-red-500">*</span>}
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="password"
+                                value={formData.password}
+                                onChange={(e) => handleInputChange('password', e.target.value)}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
+                                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                }`}
+                                placeholder={user ? "Nhập mật khẩu mới" : "Nhập mật khẩu"}
+                            />
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                        </div>
+                        {errors.password && (
+                            <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                        )}
                     </div>
+
+                    {/* Số điện thoại */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+                        <div className="relative">
+                            <input
+                                type="tel"
+                                value={formData.phone}
+                                onChange={(e) => handleInputChange('phone', e.target.value)}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
+                                    errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                }`}
+                                placeholder="0123456789"
+                            />
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                        </div>
+                        {errors.phone && (
+                            <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Địa chỉ */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
+                    <textarea
+                        value={formData.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"
+                        rows={3}
+                        placeholder="Nhập địa chỉ đầy đủ"
+                    />
+                </div>
+
+                {/* Vai trò */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Vai trò <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
                         <select
                             value={formData.role}
-                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onChange={(e) => handleInputChange('role', e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none bg-white"
                         >
                             <option value="customer">Khách hàng</option>
                             <option value="admin">Quản trị viên</option>
                         </select>
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
                     </div>
-                    <div className="flex justify-end space-x-3 pt-4">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
-                        >
-                            Hủy
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                        >
-                            {user ? 'Cập nhật' : 'Tạo mới'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                        className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Hủy
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    >
+                        {isSubmitting && (
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        )}
+                        {isSubmitting ? 'Đang xử lý...' : (user ? 'Cập nhật' : 'Tạo mới')}
+                    </button>
+                </div>
+            </form>
+        </Modal>
     );
 };
 
