@@ -28,16 +28,14 @@ const Navbar = () => {
 
     const handleLogout = () => {
         logout();
-        setIsMenuOpen(false); // Đóng menu mobile khi đăng xuất
+        setIsMenuOpen(false);
         navigate('/');
     };
 
-    // Hàm đóng menu khi chuyển trang trên mobile
     const handleMobileLinkClick = () => {
         setIsMenuOpen(false);
     };
 
-    // Lớp CSS cho NavLink trên desktop
     const navLinkClass = ({ isActive }) =>
         `flex items-center px-3 py-2 rounded-md text-lg font-medium transition-colors duration-200 ${
             isActive
@@ -45,7 +43,6 @@ const Navbar = () => {
                 : 'text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5'
         }`;
 
-    // Lớp CSS cho NavLink trên mobile
     const mobileNavLinkClass = ({ isActive }) =>
         `w-full text-left px-3 py-3 rounded-md text-lg font-medium transition-colors duration-200 block ${
           isActive
@@ -88,9 +85,7 @@ const Navbar = () => {
 
                                     {item.hasDropdown && (
                                         <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
-                                            {/* --- PHẦN THAY ĐỔI --- */}
                                             <div className="py-1">
-                                                {/* Đã xóa "Tất cả sản phẩm" và vạch kẻ */}
                                                 {categories.map(category => (
                                                     <Link
                                                         key={category.id}
@@ -101,7 +96,6 @@ const Navbar = () => {
                                                     </Link>
                                                 ))}
                                             </div>
-                                            {/* --- KẾT THÚC PHẦN THAY ĐỔI --- */}
                                         </div>
                                     )}
                                 </div>
@@ -110,30 +104,35 @@ const Navbar = () => {
                     </div>
 
                     {/* Right Menu - Desktop */}
-                    <div className="hidden lg:flex items-center space-x-6">
+                    <div className="hidden lg:flex items-center space-x-3">
                         {isAuthenticated ? (
                             <>
-                                <NavLink to="/profile" className="flex items-center space-x-2 text-gray-700 hover:text-[#A25F4B] font-medium text-lg transition-colors duration-200 hover:bg-[#A25F4B]/5 px-3 py-2 rounded-md">
-                                    <FiUser className="h-5 w-5" />
-                                    <span>{user?.name || 'Hồ Sơ'}</span>
+                                <NavLink to="/profile" className="flex items-center space-x-2 text-gray-700 hover:text-[#A25F4B] font-medium text-base transition-all duration-200 hover:bg-[#A25F4B]/5 px-3 py-2 rounded-lg group">
+                                    <FiUser className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                                    <span className="max-w-24 truncate">{user?.name || 'Hồ Sơ'}</span>
                                 </NavLink>
-                                <button onClick={handleLogout} className="flex items-center space-x-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white font-medium text-lg px-3 py-2 rounded-md transition-colors duration-200">
+                                <button onClick={handleLogout} className="flex items-center space-x-2 bg-red-500 text-black font-bold text-base px-4 py-2 rounded-md hover:bg-red-600 transition-all duration-200">
                                     <FiLogIn className="h-5 w-5" />
                                     <span>Đăng Xuất</span>
                                 </button>
                             </>
                         ) : (
-                            <Link to="/login" className="flex items-center space-x-2 text-gray-700 hover:text-[#A25F4B] font-medium text-lg transition-colors duration-200 hover:bg-[#A25F4B]/5 px-3 py-2 rounded-md">
-                                <FiLogIn className="h-5 w-5" />
-                                <span>Đăng Nhập</span>
-                            </Link>
+                            <>
+                                <Link to="/login" className="flex items-center space-x-2 text-gray-700 hover:text-[#A25F4B] font-medium text-base transition-all duration-200 hover:bg-[#A25F4B]/5 px-3 py-2 rounded-lg group">
+                                    <FiLogIn className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                                    <span>Đăng Nhập</span>
+                                </Link>
+                                <Link to="/register" className="bg-gradient-to-r from-[#A25F4B] to-[#8B4A3A] text-white hover:from-[#8B4A3A] hover:to-[#6B3A2A] font-semibold text-base px-5 py-2 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:-translate-y-0.5">
+                                    <span>Đăng ký miễn phí</span>
+                                </Link>
+                            </>
                         )}
 
-                        <div className="relative ml-4">
-                            <Link to="/cart" className="block p-2 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/10 rounded-full transition-colors duration-200">
-                                <FiShoppingCart className="h-7 w-7" />
+                        <div className="relative ml-2">
+                            <Link to="/cart" className="block p-2.5 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/10 rounded-full transition-all duration-200 group">
+                                <FiShoppingCart className="h-6 w-6 group-hover:scale-110 transition-transform duration-200" />
                                 {cartItemCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse">
+                                    <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg animate-bounce">
                                         {cartItemCount}
                                     </span>
                                 )}
@@ -168,16 +167,13 @@ const Navbar = () => {
                                         </div>
                                     </button>
                                     {isMobileProductDropdownOpen && (
-                                        // --- PHẦN THAY ĐỔI ---
                                         <div className="ml-4 mt-1 space-y-1">
-                                            {/* Đã xóa "Tất cả sản phẩm" */}
                                             {categories.map(category => (
                                                 <Link key={category.id} to={`/category/${category.id}`} onClick={handleMobileLinkClick} className="block px-3 py-2 text-base text-gray-600 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 rounded">
                                                     {category.name}
                                                 </Link>
                                             ))}
                                         </div>
-                                        // --- KẾT THÚC PHẦN THAY ĐỔI ---
                                     )}
                                 </div>
                             )}
@@ -188,27 +184,32 @@ const Navbar = () => {
 
                     {isAuthenticated ? (
                         <>
-                            <NavLink to="/profile" onClick={handleMobileLinkClick} className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 font-medium text-lg transition-colors duration-200 rounded-md">
-                                <FiUser className="h-6 w-6" />
-                                <span>{user?.name || 'Hồ Sơ'}</span>
+                            <NavLink to="/profile" onClick={handleMobileLinkClick} className="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 font-medium text-base transition-all duration-200 rounded-lg group">
+                                <FiUser className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                                <span className="truncate">{user?.name || 'Hồ Sơ'}</span>
                             </NavLink>
-                             <button onClick={handleLogout} className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 font-medium text-lg transition-colors duration-200 rounded-md">
-                                <FiLogIn className="h-6 w-6" />
+                             <button onClick={handleLogout} className="w-full flex items-center space-x-3 px-4 py-3 bg-red-500 text-black font-bold text-base rounded-md hover:bg-red-600 transition-all duration-200 group">
+                                <FiLogIn className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                                 <span>Đăng Xuất</span>
                             </button>
                         </>
                     ) : (
-                        <NavLink to="/login" onClick={handleMobileLinkClick} className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 font-medium text-lg transition-colors duration-200 rounded-md">
-                            <FiLogIn className="h-6 w-6" />
-                            <span>Đăng Nhập</span>
-                        </NavLink>
+                        <>
+                            <NavLink to="/login" onClick={handleMobileLinkClick} className="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 font-medium text-base transition-all duration-200 rounded-lg group">
+                                <FiLogIn className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                                <span>Đăng Nhập</span>
+                            </NavLink>
+                            <Link to="/register" onClick={handleMobileLinkClick} className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-[#A25F4B] to-[#8B4A3A] text-white hover:from-[#8B4A3A] hover:to-[#6B3A2A] font-semibold text-base px-4 py-3 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                                <span>Đăng ký miễn phí</span>
+                            </Link>
+                        </>
                     )}
 
-                    <NavLink to="/cart" onClick={handleMobileLinkClick} className="w-full flex items-center space-x-3 px-3 py-3 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 font-medium text-lg transition-colors duration-200 rounded-md">
+                    <NavLink to="/cart" onClick={handleMobileLinkClick} className="w-full flex items-center space-x-3 px-4 py-3 text-gray-700 hover:text-[#A25F4B] hover:bg-[#A25F4B]/5 font-medium text-base transition-all duration-200 rounded-lg group">
                         <div className="relative">
-                            <FiShoppingCart className="h-6 w-6" />
+                            <FiShoppingCart className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                             {cartItemCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-medium">
+                                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold shadow-lg animate-bounce">
                                     {cartItemCount}
                                 </span>
                             )}
