@@ -61,15 +61,15 @@ const PaymentPage = () => {
     };
 
     if (loading) {
-        return <div className="text-center p-10">Đang tải thông tin thanh toán...</div>;
+        return <div className="text-center p-10 min-h-screen bg-gradient-to-br from-orange-100 via-orange-200 to-orange-300 flex items-start justify-center pt-20">Đang tải thông tin thanh toán...</div>;
     }
 
     if (error) {
-        return <div className="text-center p-10 text-red-500">{error}</div>;
+        return <div className="text-center p-10 min-h-screen bg-gradient-to-br from-orange-100 via-orange-200 to-orange-300 flex items-start justify-center pt-20 text-red-500">{error}</div>;
     }
 
     if (!order) {
-        return <div className="text-center p-10">Không có thông tin đơn hàng.</div>;
+        return <div className="text-center p-10 min-h-screen bg-gradient-to-br from-orange-100 via-orange-200 to-orange-300 flex items-start justify-center pt-20">Không có thông tin đơn hàng.</div>;
     }
     
     const formattedAmount = new Intl.NumberFormat('vi-VN', { 
@@ -78,7 +78,7 @@ const PaymentPage = () => {
     }).format(order.totalAmount);
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="flex items-start justify-center min-h-screen bg-gradient-to-br from-orange-100 via-orange-200 to-orange-300 p-4 pb-20">
             <div className="w-full max-w-lg p-8 space-y-6 bg-white rounded-xl shadow-md text-center border">
                 <h1 className="text-3xl font-bold text-gray-800">Xác nhận Thanh toán</h1>
                 <p className="text-gray-600">
@@ -104,9 +104,6 @@ const PaymentPage = () => {
                     />
                 </div>
                 
-                <p className="text-xs text-gray-500">
-                    Sau khi thanh toán, hãy nhấn nút "Tôi đã hoàn tất" để xác nhận.
-                </p>
                 
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 

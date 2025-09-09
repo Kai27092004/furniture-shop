@@ -56,7 +56,7 @@ const CartPage = () => {
 
     if (cartItems.length === 0) {
         return (
-            <div className="text-center p-10 min-h-[60vh] flex flex-col justify-center items-center bg-gray-50">
+            <div className="text-center p-10 min-h-[60vh] flex flex-col justify-center items-center bg-gradient-to-br from-orange-100 via-orange-200 to-orange-300">
                 <h1 className="text-2xl sm:text-3xl font-semibold mb-4 text-gray-800">Giỏ hàng của bạn đang trống</h1>
                 <p className="text-gray-600 mb-6">Hãy khám phá và thêm những sản phẩm nội thất tinh tế vào giỏ hàng nhé!</p>
                 <Link to="/products" className="bg-[#A25F4B] text-white py-3 px-8 rounded-lg hover:bg-[#8B4A3A] transition-colors font-semibold shadow-sm">
@@ -67,7 +67,7 @@ const CartPage = () => {
     }
 
     return (
-        <form onSubmit={handleProceedToCheckout} className="min-h-screen bg-[#F9F8F4] py-6 sm:py-10">
+        <form onSubmit={handleProceedToCheckout} className="min-h-screen bg-gradient-to-br from-orange-100 via-orange-200 to-orange-300 py-6 sm:py-10">
             <div className="max-w-6xl mx-auto px-2 sm:px-4">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#3A3A3A] mb-6 sm:mb-8 text-center">
                     Giỏ hàng của bạn

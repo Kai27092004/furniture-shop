@@ -6,8 +6,40 @@ const ProductCarousel = ({ products, navigateTo }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
 
-  // Chỉ lấy 5 sản phẩm đầu tiên để hiển thị như logic cũ
-  const featuredProducts = products.slice(0, 5);
+  // Danh sách ảnh cố định: 3 sofa + 2 giường
+  // Mapping với sản phẩm thực tế trong database
+  const carouselImages = [
+    {
+      id: 16, // ID sản phẩm thực tế trong database
+      name: 'Sofa Bed',
+      imageUrl: '/upload/sofa-bed.jpg',
+      category: 'Sofa'
+    },
+    {
+      id: 14, // ID sản phẩm thực tế trong database
+      name: 'Sofa Kết Nối',
+      imageUrl: '/upload/sofa-ket-noi.jpg',
+      category: 'Sofa'
+    },
+    {
+      id: 13, // ID sản phẩm thực tế trong database
+      name: 'Sofa Ngọc Nga',
+      imageUrl: '/upload/sofa-ngoc-nga.jpg',
+      category: 'Sofa'
+    },
+    {
+      id: 3, // ID sản phẩm thực tế trong database
+      name: 'Giường Da',
+      imageUrl: '/upload/giuong-da.jpg',
+      category: 'Giường'
+    },
+    {
+      id: 1, // ID sản phẩm thực tế trong database
+      name: 'Giường Điệp Mộc',
+      imageUrl: '/upload/giuong-diep-moc.jpg',
+      category: 'Giường'
+    }
+  ];
 
   // Xử lý responsive để thay đổi số lượng item trên mỗi view
   useEffect(() => {
@@ -29,33 +61,28 @@ const ProductCarousel = ({ products, navigateTo }) => {
 
   // Logic tự động trượt slide
   useEffect(() => {
-    if (featuredProducts.length > itemsPerView) {
+    if (carouselImages.length > itemsPerView) {
       const timer = setInterval(() => {
         nextSlide();
       }, 5000);
 
       return () => clearInterval(timer);
     }
-  }, [currentIndex, itemsPerView, featuredProducts.length]);
+  }, [currentIndex, itemsPerView, carouselImages.length]);
 
   const nextSlide = () => {
-    const maxIndex = featuredProducts.length - itemsPerView;
+    const maxIndex = carouselImages.length - itemsPerView;
     setCurrentIndex(prev => prev >= maxIndex ? 0 : prev + 1);
   };
 
   const prevSlide = () => {
-    const maxIndex = featuredProducts.length - itemsPerView;
+    const maxIndex = carouselImages.length - itemsPerView;
     setCurrentIndex(prev => prev <= 0 ? maxIndex : prev - 1);
   };
 
   // Kiểm tra xem có thể trượt tới hoặc lùi không
   const canGoPrev = currentIndex > 0;
-  const canGoNext = currentIndex < featuredProducts.length - itemsPerView;
-    
-  // Trả về null nếu không có sản phẩm
-  if (!products || products.length === 0) {
-    return null;
-  }
+  const canGoNext = currentIndex < carouselImages.length - itemsPerView;
 
   return (
     <div className="relative w-full overflow-hidden">
@@ -68,19 +95,19 @@ const ProductCarousel = ({ products, navigateTo }) => {
             transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`
           }}
         >
-          {featuredProducts.map((product) => (
+          {carouselImages.map((item) => (
             <div 
-              key={product.id}
+              key={item.id}
               className="flex-shrink-0 relative group cursor-pointer"
               style={{ width: `${100 / itemsPerView}%` }}
               // Thay đổi navigateTo để điều hướng đến trang chi tiết sản phẩm
-              onClick={() => navigateTo && navigateTo('product-detail', product.id)}
+              onClick={() => navigateTo && navigateTo('product-detail', item.id)}
             >
               {/* Container hình ảnh */}
               <div className="relative aspect-[4/3] overflow-hidden rounded-xl shadow-lg bg-gray-100">
                 <img
-                  src={`${BACKEND_URL}${product.imageUrl || '/img/placeholder.jpg'}`}
-                  alt={product.name}
+                  src={`${BACKEND_URL}${item.imageUrl}`}
+                  alt={item.name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     // Fallback sang ảnh placeholder nếu ảnh gốc bị lỗi
@@ -94,10 +121,10 @@ const ProductCarousel = ({ products, navigateTo }) => {
                 {/* Lớp phủ văn bản khi hover */}
                 <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
                   <h3 className="font-bold text-sm md:text-base lg:text-lg mb-1 line-clamp-2">
-                    {product.name}
+                    {item.name}
                   </h3>
                   <p className="text-xs md:text-sm text-gray-200 line-clamp-1">
-                    Xem chi tiết
+                    {item.category}
                   </p>
                 </div>
               </div>
@@ -130,7 +157,7 @@ const ProductCarousel = ({ products, navigateTo }) => {
       {/* Chỉ báo bằng dấu chấm */}
       <div className="flex justify-center mt-4 md:mt-6 space-x-2">
         {/* Điều chỉnh length của mảng để khớp với số lượng slide thực tế */}
-        {Array.from({ length: featuredProducts.length - itemsPerView + 1 }).map((_, index) => (
+        {Array.from({ length: carouselImages.length - itemsPerView + 1 }).map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}

@@ -1,9 +1,10 @@
 // File: frontend/src/components/ProductCard.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Eye, Heart, ShoppingCart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { BACKEND_URL } from '../services/api'; // <-- THÊM DÒNG NÀY
 import { useToast } from '../context/ToastContext';
 
@@ -24,7 +25,25 @@ const ProductCard = ({ product }) => {
     };
     
     const [isHovered, setIsHovered] = useState(false);
-    const [isFavorited, setIsFavorited] = useState(false);
+
+    // Animation variants cho hiệu ứng cuộn xuống
+    const cardVariants = {
+        hidden: { 
+            opacity: 0, 
+            y: 50,
+            scale: 0.9
+        },
+        visible: { 
+            opacity: 1, 
+            y: 0,
+            scale: 1,
+            transition: { 
+                duration: 0.6, 
+                ease: "easeOut",
+                delay: 0.1
+            } 
+        }
+    };
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -37,10 +56,28 @@ const ProductCard = ({ product }) => {
         Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
     return (
-        <div 
-            className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 group relative overflow-hidden border"
+        <motion.div 
+            className="bg-white rounded-lg shadow-sm hover:shadow-2xl transition-all duration-300 group relative overflow-hidden border"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={cardVariants}
+            whileHover={{ 
+                y: -8, 
+                scale: 1.02,
+                transition: { 
+                    duration: 0.3, 
+                    ease: "easeOut" 
+                } 
+            }}
+            whileTap={{ 
+                scale: 0.98,
+                transition: { 
+                    duration: 0.1 
+                } 
+            }}
         >
             {/* Product Image */}
             <div className="relative overflow-hidden">
@@ -64,27 +101,6 @@ const ProductCard = ({ product }) => {
                     </span>
                 )}
 
-                {/* Action Buttons - Hiện khi hover */}
-                <div className={`absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center transition-all duration-300 ${
-                    isHovered ? 'opacity-100' : 'opacity-0'
-                }`}>
-                    <div className="flex space-x-2">
-                        <Link to={`/products/${product.id}`} className="bg-white p-3 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200 group/btn">
-                            <Eye className="h-5 w-5 text-gray-600 group-hover/btn:text-blue-600" />
-                        </Link>
-                        <button 
-                            onClick={() => setIsFavorited(!isFavorited)}
-                            className="bg-white p-3 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200 group/btn"
-                        >
-                            <Heart className={`h-5 w-5 transition-colors duration-200 ${
-                                isFavorited ? 'text-red-500 fill-red-500' : 'text-gray-600 group-hover/btn:text-red-600'
-                            }`} />
-                        </button>
-                        <button onClick={handleAddToCart} className="bg-white p-3 rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200 group/btn">
-                            <ShoppingCart className="h-5 w-5 text-gray-600 group-hover/btn:text-green-600" />
-                        </button>
-                    </div>
-                </div>
             </div>
 
             {/* Product Info */}
@@ -99,22 +115,30 @@ const ProductCard = ({ product }) => {
 
                 <div className="flex items-center mb-3">
                     <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                                key={star}
-                                className={`h-4 w-4 ${
-                                star <= product.rating
-                                    ? 'text-yellow-400 fill-yellow-400'
-                                    : 'text-gray-300'
-                                }`}
-                            />
-                        ))}
+                        {[1, 2, 3, 4, 5].map((star) => {
+                            const rating = product.rating || 4.5; // Mặc định 4.5 sao
+                            const isHalfStar = star === Math.ceil(rating) && rating % 1 !== 0;
+                            const isFilled = star < rating;
+                            
+                            return (
+                                <Star
+                                    key={star}
+                                    className={`h-4 w-4 ${
+                                        isFilled
+                                            ? 'text-amber-600 fill-amber-600'
+                                            : isHalfStar
+                                            ? 'text-amber-600 fill-amber-600 opacity-50'
+                                            : 'text-gray-300'
+                                    }`}
+                                />
+                            );
+                        })}
                     </div>
-                    {product.ratingCount > 0 && <span className="text-xs text-gray-500 ml-2">({product.ratingCount} đánh giá)</span>}
+                    <span className="text-xs text-gray-500 ml-2">(4.5/5)</span>
                 </div>
 
                 <div className="flex items-baseline space-x-2">
-                    <span className="text-xl font-bold text-blue-600">
+                    <span className="text-xl font-bold text-amber-800">
                         {formatPrice(product.price)}
                     </span>
                     {product.originalPrice && (
@@ -133,7 +157,7 @@ const ProductCard = ({ product }) => {
                     Thêm vào giỏ hàng
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

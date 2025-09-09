@@ -154,7 +154,7 @@ const ProductDetailPage = () => {
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
                                 <div className="flex items-center space-x-4 mb-4">
-                                    <span className="text-3xl font-bold text-hot-orange">
+                                    <span className="text-3xl font-bold text-amber-800">
                                         {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
                                     </span>
                                     {product.hot && (
@@ -227,11 +227,9 @@ const ProductDetailPage = () => {
                                         <span className="font-medium text-gray-700">Trạng thái:</span>
                                         <span className="ml-2 text-green-600">Còn hàng</span>
                                     </div>
-                                </div>
-                                <div>
-                                    <span className="font-medium text-gray-700">Danh mục:</span>
-                                    <div className="mt-1 flex flex-wrap gap-2">
-                                        <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                                    <div>
+                                        <span className="font-medium text-gray-700">Danh mục:</span>
+                                        <span className="ml-2 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                                            {product.category?.name || 'Chưa phân loại'}
                                         </span>
                                     </div>

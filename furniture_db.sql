@@ -1,6 +1,6 @@
 -- BƯỚC 1: TẠO CƠ SỞ DỮ LIỆU (SCHEMA) NẾU CHƯA TỒN TẠI
 -- Sử dụng collation utf8mb4_unicode_ci để hỗ trợ tiếng Việt và các ký tự đặc biệt tốt nhất.
-DROP DATABASE IF EXISTS furniture_db;
+-- DROP DATABASE IF EXISTS furniture_db;
 CREATE DATABASE IF NOT EXISTS furniture_db 
 CHARACTER SET utf8mb4 
 COLLATE utf8mb4_unicode_ci;
@@ -91,7 +91,7 @@ CREATE TABLE OrderItems (
 -- Mật khẩu đã được mã hóa bằng bcrypt, tương ứng với 'admin123' và 'user123'.
 INSERT INTO `Users` (`fullName`, `email`, `password`, `phone`, `address`, `role`) VALUES
 -- 1. TÀI KHOẢN ADMIN
-('Quản Trị Viên', 'admin@noithat.com', '$2a$12$78cga50NK6qxk35cpjwlKetU9VJvTUpI0UhfinwAQdSUH/QyO3itO', '0987654321', '123 Đường Admin, Quận 1, TP.HCM', 'admin'),
+('Quản Trị Viên', 'admin@email.com', '$2a$12$78cga50NK6qxk35cpjwlKetU9VJvTUpI0UhfinwAQdSUH/QyO3itO', '0987654321', '123 Đường Admin, Quận 1, TP.HCM', 'admin'),
 ('Nguyễn Văn An', 'nguyen.an@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0912345678', '111 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội', 'customer'),
 ('Trần Thị Bích', 'tran.bich@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0923456789', '222 Lê Lợi, Quận Hải Châu, Đà Nẵng', 'customer'),
 ('Lê Minh Cường', 'le.cuong@email.com', '$2a$12$9NpdokzqzT5hBOCKYsfUNeCraPB.qJAM/SnC1iUhNb5WU.1tyX2Aq', '0934567890', '333 Trần Hưng Đạo, Quận 5, TP.HCM', 'customer'),

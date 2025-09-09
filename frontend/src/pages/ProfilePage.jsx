@@ -83,9 +83,9 @@ const ProfilePage = () => {
                         </div>
                     </div>
                     <div className="flex flex-col items-start w-full md:w-auto md:items-end text-base mt-4 md:mt-0">
-                        <p className="mb-1"><span className="font-semibold">Email:</span> {profile.email}</p>
-                        <p className="mb-1"><span className="font-semibold">SĐT:</span> {profile.phone || 'Chưa cập nhật'}</p>
-                        <p><span className="font-semibold">Địa chỉ:</span> {profile.address || 'Chưa cập nhật'}</p>
+                        <p className="mb-1"><span className="font-semibold">Email:</span> <span className="font-bold">{profile.email}</span></p>
+                        <p className="mb-1"><span className="font-semibold">SĐT:</span> <span className="font-bold">{profile.phone || 'Chưa cập nhật'}</span></p>
+                        <p><span className="font-semibold">Địa chỉ:</span> <span className="font-bold">{profile.address || 'Chưa cập nhật'}</span></p>
                     </div>
                 </div>
 
