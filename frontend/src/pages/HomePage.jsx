@@ -49,14 +49,14 @@ const HomePage = () => {
         `${BACKEND_URL}/upload/tu-ao-diep-nhien.jpg`
     ];
 
-    // Hình ảnh cho khối "#ChiaSẻKhôngGianSống" sử dụng assets
+    // Hình ảnh cho khối "#ChiaSẻKhôngGianSống" sử dụng public
     const livingSpaceImages = [
-        '/src/assets/phong-khach.jpg',
-        '/src/assets/phong-ngu.jpg',
-        '/src/assets/phong-lam-viec.jpg',
-        '/src/assets/ke-sach.jpg',
-        '/src/assets/tu-ruu.jpg',
-        '/src/assets/phong-lam-viec1.jpg',
+        '/phong-khach.jpg',
+        '/phong-ngu.jpg',
+        '/phong-lam-viec.jpg',
+        '/ke-sach.jpg',
+        '/tu-ruu.jpg',
+        '/phong-lam-viec1.jpg',
     ];
 
     // Function để lấy hình ảnh phù hợp cho từng danh mục

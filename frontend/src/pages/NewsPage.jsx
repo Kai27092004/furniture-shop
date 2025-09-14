@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Import hình ảnh từ assets
-import phongKhach from '../assets/phong-khach.jpg';
-import phongLamViec from '../assets/phong-lam-viec.jpg';
-import phongLamViec1 from '../assets/phong-lam-viec1.jpg';
-import phongNgu from '../assets/phong-ngu.jpg';
-import keSach from '../assets/ke-sach.jpg';
-import tuRuu from '../assets/tu-ruu.jpg';
+// Import hình ảnh từ public
+const phongKhach = '/phong-khach.jpg';
+const phongLamViec = '/phong-lam-viec.jpg';
+const phongLamViec1 = '/phong-lam-viec1.jpg';
+const phongNgu = '/phong-ngu.jpg';
+const keSach = '/ke-sach.jpg';
+const tuRuu = '/tu-ruu.jpg';
 
 const NewsPage = () => {
     const [currentSlide, setCurrentSlide] = useState(0);

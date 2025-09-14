@@ -64,20 +64,20 @@ const ProductCard = ({ product }) => {
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
             variants={cardVariants}
-            whileHover={{ 
-                y: -8, 
-                scale: 1.02,
-                transition: { 
-                    duration: 0.3, 
-                    ease: "easeOut" 
-                } 
-            }}
-            whileTap={{ 
-                scale: 0.98,
-                transition: { 
-                    duration: 0.1 
-                } 
-            }}
+            // whileHover={{ 
+            //     y: -8, 
+            //     scale: 1.02,
+            //     transition: { 
+            //         duration: 0.3, 
+            //         ease: "easeOut" 
+            //     } 
+            // }}
+            // whileTap={{ 
+            //     scale: 0.98,
+            //     transition: { 
+            //         duration: 0.1 
+            //     } 
+            // }}
         >
             {/* Product Image */}
             <div className="relative overflow-hidden">

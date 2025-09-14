@@ -98,9 +98,11 @@ const PaymentPage = () => {
 
                 <div className="flex justify-center my-4">
                     <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=Thanh+toan+don+hang+SHOPNK+${order.totalAmount}`} 
+                        src={`https://qr.sepay.vn/img?acc=VQRQAEEDX8389&bank=MBBank&amount=${order.totalAmount}&des=${order.id}`} 
                         alt="Mã QR thanh toán"
                         className="rounded-lg border p-1"
+                        width="220"
+                        height="220"
                     />
                 </div>
                 
