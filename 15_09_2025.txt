@@ -1,0 +1,6 @@
+Nhiệm vụ: Tích hợp chatbotAI 
+
+Backend: npm install openai axios
+
+
+Sử dụng Fallback Analysis (Free), OpenAI API "platform.openai.com" (tốn phí)

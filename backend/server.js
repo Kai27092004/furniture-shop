@@ -37,6 +37,7 @@ app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/orders', require('./routes/order.routes'));
 app.use('/api/dashboard', require('./routes/dashboard.routes'));
+app.use('/api/chatbot', require('./routes/chatbot.routes'));
 // Thêm các routes khác ở đây...
 
 const PORT = process.env.PORT || 8080;

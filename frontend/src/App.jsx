@@ -7,6 +7,7 @@ import MainLayout from './components/MainLayout';
 import AdminLayout from './pages/admin/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
+import FloatingShopnkButton from './components/FloatingShopnkButton';
 
 import HomePage from './pages/HomePage';
 import ProductListPage from './pages/ProductListPage';
@@ -40,6 +41,10 @@ function App() {
   return (
     <ToastProvider>
       <ScrollToTop />
+      <FloatingShopnkButton 
+        phoneNumber="+84 876 807 798"
+        facebookUrl="https://www.facebook.com/nguyenthanhkai"
+      />
       <Routes>
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
